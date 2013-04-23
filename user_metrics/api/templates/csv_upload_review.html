@@ -1,8 +1,46 @@
 {% extends "layout.html" %}
 {% block body %}
-<table>
-    <tr>
-        <td>hi</td>
-    </tr>
+
+{% if invalid %}
+<table class="table table-striped">
+    <thead><tr><th>In-Valid Users</th></tr></thead>
+    <tbody>
+    {% for i in invalid %}
+        <tr>
+        {% for p in i %}
+            <td>{{ p }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
 </table>
+
+<form action="/uploads/cohort/validate" method="POST" class="form-horizontal">
+    <div class="form-actions">
+        <input type="submit" class="btn btn-primary" value="Re-Check These Users"/>
+    </div>
+</form>
+{% endif %}
+
+{% if valid %}
+<table class="table table-striped">
+    <thead><tr><th>Valid Users</th></tr></thead>
+    <tbody>
+    {% for v in valid %}
+        <tr>
+        {% for p in v %}
+            <td>{{ p }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<form action="/uploads/cohort/finish" method="POST" class="form-horizontal">
+    <div class="form-actions">
+        <a class="btn" href="/uploads/cohort">Go Back to Upload</a>
+        <input type="submit" class="btn btn-primary" value="Finish This Upload"/>
+    </div>
+</form>
 {% endblock %}

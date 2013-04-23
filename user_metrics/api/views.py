@@ -39,6 +39,7 @@ from user_metrics.api.session import APIUser
 
 # upload files
 from werkzeug import secure_filename
+import csv
 UPLOAD_FOLDER = 'csv_uploads'
 ALLOWED_EXTENSIONS = set(['csv'])
 
@@ -163,10 +164,10 @@ def upload_csv_cohort():
 
     else:
         file = request.files['csv_cohort']
-        unvalidated = file.read()
-        print unvalidated
-        #(valid, invalid) = validate_records(unvalidated)
-        return render_template('csv_upload_review.html') #(valid, invalid)
+        unvalidated = csv.reader(file.stream)
+        
+        (valid, invalid) = validate_records(unvalidated)
+        return render_template('csv_upload_review.html', valid=valid, invalid=invalid)
 
 def review_csv_cohort():
     valid = request.form['valid']
@@ -176,7 +177,17 @@ def review_csv_cohort():
     return (valid, invalid) # as json
 
 def validate_records(records):
-    return ([], [])
+    i = 0
+    valid = []
+    invalid = []
+    for record in records:
+        i += 1
+        if i % 2 == 0:
+            valid.append(record)
+        else:
+            invalid.append(record)
+    
+    return (valid, invalid)
 
 
 def metric(metric=''):
