@@ -10,11 +10,13 @@
 
 __author__ = {
     "dario taraborelli": "dario@wikimedia.org",
-    "ryan faulkner": "rfaulkner@wikimedia.org"
+    "ryan faulkner": "rfaulkner@wikimedia.org",
+    "dan andreescu": "dandreescu@wikimedia.org"
 }
 __date__ = "2012-12-21"
 __license__ = "GPL (version 2 or later)"
 
+import os
 
 from flask import Flask, render_template, Markup, redirect, url_for, \
     request, escape, flash, jsonify, make_response
@@ -34,8 +36,17 @@ from user_metrics.api.engine.request_manager import api_request_queue, \
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.api.session import APIUser
 
+
+# upload files
+from werkzeug import secure_filename
+UPLOAD_FOLDER = 'csv_uploads'
+ALLOWED_EXTENSIONS = set(['csv'])
+
+
 # Instantiate flask app
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # REGEX to identify refresh flags in the URL
 REFRESH_REGEX = r'refresh[^&]*&|\?refresh[^&]*$|&refresh[^&]*$'
@@ -143,6 +154,29 @@ def all_metrics():
         return metric(request.form['selectMetric'])
     else:
         return render_template('all_metrics.html')
+
+
+def upload_csv_cohort():
+    """ View for uploading and validating a new cohort via CSV """
+    if request.method == 'GET':
+        return render_template('csv_upload.html')
+
+    else:
+        file = request.files['csv_cohort']
+        unvalidated = file.read()
+        print unvalidated
+        #(valid, invalid) = validate_records(unvalidated)
+        return render_template('csv_upload_review.html') #(valid, invalid)
+
+def review_csv_cohort():
+    valid = request.form['valid']
+    invalid = request.form['invalid']
+    #(new_valid, invalid) = validate_records(invalid)
+    #valid.append(new_valid)
+    return (valid, invalid) # as json
+
+def validate_records(records):
+    return ([], [])
 
 
 def metric(metric=''):
@@ -356,7 +390,8 @@ view_list = {
     all_metrics.__name__: all_metrics,
     about.__name__: about,
     contact.__name__: contact,
-    thin_client_view.__name__: thin_client_view
+    thin_client_view.__name__: thin_client_view,
+    upload_csv_cohort.__name__: upload_csv_cohort
 }
 
 # Dict stores routing paths for each view
@@ -371,31 +406,25 @@ route_deco = {
     all_metrics.__name__: app.route('/metrics/', methods=['POST', 'GET']),
     about.__name__: app.route('/about/'),
     contact.__name__: app.route('/contact/'),
-    thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>')
+    thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>'),
+    upload_csv_cohort.__name__: app.route('/uploads/cohort', methods=['POST', 'GET'])
 }
 
 # Dict stores flag for login required on view
-login_req_deco = {
-    api_root.__name__: False,
-    all_urls.__name__: True,
-    job_queue.__name__: True,
-    output.__name__: True,
-    cohort.__name__: True,
-    all_cohorts.__name__: True,
-    metric.__name__: True,
-    all_metrics.__name__: False,
-    about.__name__: False,
-    contact.__name__: False,
-    thin_client_view.__name__: False
-}
+views_with_anonymous_access = [
+    api_root.__name__,
+    all_metrics.__name__,
+    about.__name__,
+    contact.__name__,
+    thin_client_view.__name__
+]
 
 # Apply decorators to views
 
 if settings.__flask_login_exists__:
-    for key in login_req_deco:
-        view_method = view_list[key]
-        if login_req_deco[key]:
-            view_list[key] = login_required(view_method)
+    for key in view_list:
+        if key not in views_with_anonymous_access:
+            view_list[key] = login_required(view_list[key])
 
 for key in route_deco:
     route = route_deco[key]
