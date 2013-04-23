@@ -695,6 +695,22 @@ def get_mw_user_id(username, project):
     return uid
 get_mw_user_id.__query_name__ = 'get_mw_user_id'
 
+def is_valid_uid_query(uid, project):
+    conn = Connector(instance=conf.PROJECT_DB_MAP[project])
+    query = query_store[is_valid_uid_query.__name__]
+    query = sub_tokens(query, db=escape_var(project))
+    params = {'uid' : int(uid)}
+    conn._cur_.execute(query, params) 
+    try:
+        ids = conn._cur_.fetchall()
+    except (OperationalError, ProgrammingError) as e:
+        logging.error(__name__ +
+                      ' :: Query failed: {0}, params = {1}'.
+                      format(query, str(params)))
+        return False
+    return len(ids) != 1
+is_valid_uid_query.__query_name__ = 'is_valid_uid_query'
+
 
 @query_method_deco
 def get_latest_user_activity(users, project, args):
@@ -955,4 +971,9 @@ query_store = {
             AND rev_timestamp > %(start)s
             AND rev_timestamp <= %(end)s
     """,
+    is_valid_user_query.__name__ :
+    """
+        SELECT user_id FROM <database>.user
+        WHERE user_id = %(uid)s
+           OR username = %(username)s"""
 }

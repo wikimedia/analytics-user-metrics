@@ -177,16 +177,15 @@ def review_csv_cohort():
     return (valid, invalid) # as json
 
 def validate_records(records):
-    i = 0
     valid = []
     invalid = []
     for record in records:
-        i += 1
-        if i % 2 == 0:
+        if query_mod.mw_username(record[0]):
+            valid.append(record)
+        elif query_mod.is_valid_uid(record[0]):
             valid.append(record)
         else:
             invalid.append(record)
-    
     return (valid, invalid)
 
 
