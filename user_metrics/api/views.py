@@ -167,28 +167,26 @@ def upload_csv_cohort():
         )
 
     elif request.method == 'POST':
-        file = request.files['csv_cohort']
-        unparsed = csv.reader(file.stream)
+        cohort_file = request.files['csv_cohort']
+        cohort_name = request.form['csv_cohort_name']
+        cohort_project = request.form['csv_cohort_name']
         
-        unvalidated = parse_records(unparsed, request.form['cohort_project'])
+        unparsed = csv.reader(cohort_file.stream)
+        unvalidated = parse_records(unparsed, cohort_project)
         (valid, invalid) = validate_records(unvalidated)
+        
         return render_template('csv_upload_review.html',
             valid=valid,
             invalid=invalid,
             valid_json=json.dumps(valid),
             invalid_json=json.dumps(invalid),
-            cohort_name=request.form['csv_cohort_name']
+            cohort_name=cohort_name,
+            cohort_project=cohort_project,
+            wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
         )
 
 def validate_cohort_name_allowed():
     return json.dumps(query_mod.is_valid_cohort_query(request.args.get('csv_cohort_name')))
-
-def review_csv_cohort():
-    valid = request.form['valid']
-    invalid = request.form['invalid']
-    #(new_valid, invalid) = validate_records(invalid)
-    #valid.append(new_valid)
-    return (valid, invalid) # as json
 
 def parse_records(records, default_project):
     return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records]

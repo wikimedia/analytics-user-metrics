@@ -10,8 +10,9 @@
         <label for="cohort_project" class="control-label">Wiki Project</label>
         <div class="controls">
             <select name="cohort_project" id="cohort_project">
+                <option>(select one or specify in file)</option>
                 {% for project in wiki_projects %}
-                <option>{{ project }}</option>
+                <option {% if project == cohort_project %}selected{% endif %}>{{ project }}</option>
                 {% endfor %}
             </select>
         </div>
