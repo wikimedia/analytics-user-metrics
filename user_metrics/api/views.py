@@ -35,6 +35,7 @@ from user_metrics.api.engine.request_manager import api_request_queue, \
     req_cb_get_cache_keys, req_cb_get_url, req_cb_get_is_running
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.api.session import APIUser
+import user_metrics.config.settings as conf
 
 
 # upload files
@@ -185,16 +186,34 @@ def validate_records(records):
     valid = []
     invalid = []
     for record in records:
-        user_str = record['username']
-        project = record['project']
-        if query_mod.is_valid_username_query(user_str, project): 
+        logging.debug('project: %s', record['project'])
+
+        if record['project'] not in conf.PROJECT_DB_MAP:
+            if record['project'].endswith('wiki'):
+                record['reason_invalid'] = 'invalid project: %s' % record['project']
+                invalid.append(record)
+                continue
+            else:
+                # try adding wiki to end
+                tmp_proj = record['project'] + 'wiki'
+                if tmp_proj not in conf.PROJECT_DB_MAP:
+                    record['reason_invalid'] = 'invalid project: %s' % record['project']
+                    invalid.append(record)
+                    continue
+                else:
+                    record['project'] = tmp_proj
+
+
+        if query_mod.is_valid_username_query(record['username'], record['project']): 
             valid.append(record)
-            logging.debug('found a valid username: %s', user_str)
-        elif user_str.isdigit() and query_mod.is_valid_uid_query(user_str, project):
-            logging.debug('found a valid uid: %s', user_str)
+            logging.debug('found a valid username: %s', record['username'])
+        elif (record['username'].isdigit() and\
+                query_mod.is_valid_uid_query(record['username'],
+                    record['project'])):
+            logging.debug('found a valid uid: %s', record['username'])
             valid.append(record)
         else:
-            logging.debug('found an invalid user_str: %s', user_str)
+            logging.debug('found an invalid user_str: %s', record['username'])
             record['reason_invalid'] = 'not recognized as user_name or user_id'
             invalid.append(record)
     return (valid, invalid)

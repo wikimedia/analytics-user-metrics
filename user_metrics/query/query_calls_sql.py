@@ -726,6 +726,23 @@ def is_valid_username_query(username, project):
     return len(ids) == 1
 is_valid_username_query.__query_name__ = 'is_valid_username_query'
 
+def is_valid_cohort_query(cohort_name):
+    conn = Connector(instance=conf.__cohort_data_instance__)
+    query = query_store[is_valid_cohort_query.__name__]
+    query = sub_tokens(query, db=conf.__cohort_meta_instance__,
+                       table=conf.__cohort_meta_db__)
+    params = {'utm_name' : cohort_name}
+    conn._cur_.execute(query, params)
+    try:
+        cohorts = conn._cur_.fetchall()
+    except (OperationalError, ProgrammingError) as e:
+        logging.error(__name__ +
+                      ' :: Query failed: {0}, params = {1}'.
+                      format(query, str(params)))
+        return False
+    return len(cohorts) == 0
+is_valid_cohort_query.__query_name__ = 'is_valid_cohort_query'
+
 
 @query_method_deco
 def get_latest_user_activity(users, project, args):
@@ -994,5 +1011,11 @@ query_store = {
     is_valid_username_query.__name__ :
     """
         SELECT user_id FROM <database>.user
-        WHERE user_name = %(username)s"""
+        WHERE user_name = %(username)s
+    """,
+    is_valid_cohort_query.__name__ :
+    """
+        SELECT utm_id FROM <database>.<table>
+        WHERE utm_name = %(utm_name)s
+    """
 }
