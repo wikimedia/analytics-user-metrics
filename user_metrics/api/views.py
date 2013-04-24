@@ -191,54 +191,83 @@ def validate_cohort_name_allowed():
 def parse_records(records, default_project):
     return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records]
 
+def normalize_project(project):
+    project = project.strip().lower()
+    if project in conf.PROJECT_DB_MAP:
+        return project
+    else:
+        if project.endswith('wiki'):
+            return None
+        else:
+            # try adding wiki to end
+            new_proj = project + 'wiki'
+            if new_proj not in conf.PROJECT_DB_MAP:
+                return None
+            else:
+                return new_proj
+
+def normalize_user(user_str, project):
+    uid = query_mod.is_valid_username_query(user_str, project)
+    if uid is not None:
+        return (uid, user_str)
+    elif user_str.isdigit():
+        username = query_mod.is_valid_uid_query(user_str, project)
+        if username is not None:
+            return (user_str, username)
+        else:
+            return None
+    else:
+        return None
+
+
 def validate_records(records):
     valid = []
     invalid = []
     for record in records:
-        logging.debug('project: %s', record['project'])
-
-        if record['project'] not in conf.PROJECT_DB_MAP:
-            if record['project'].endswith('wiki'):
-                record['reason_invalid'] = 'invalid project: %s' % record['project']
-                invalid.append(record)
-                continue
-            else:
-                # try adding wiki to end
-                tmp_proj = record['project'] + 'wiki'
-                if tmp_proj not in conf.PROJECT_DB_MAP:
-                    record['reason_invalid'] = 'invalid project: %s' % record['project']
-                    invalid.append(record)
-                    continue
-                else:
-                    record['project'] = tmp_proj
-
-
-        if query_mod.is_valid_username_query(record['username'], record['project']): 
-            valid.append(record)
-            logging.debug('found a valid username: %s', record['username'])
-        elif (record['username'].isdigit() and\
-                query_mod.is_valid_uid_query(record['username'],
-                    record['project'])):
-            logging.debug('found a valid uid: %s', record['username'])
-            valid.append(record)
-        else:
-            logging.debug('found an invalid user_str: %s', record['username'])
-            record['reason_invalid'] = 'not recognized as user_name or user_id'
+        record['user_str'] = record['username']
+        normalized_project = normalize_project(record['project'])
+        if normalized_project is None:
+            record['reason_invalid'] = 'invalid project: %s' % record['project']
             invalid.append(record)
+            continue
+        normalized_user = normalize_user(record['user_str'], normalized_project)
+        if normalized_user is None:
+            record['reason_invalid'] = 'invalid user_name / user_id: %s' % record['user_str']
+            invalid.append(record)
+            continue
+
+        logging.debug('found a valid user_str: %s', record['user_str'])
+        record['project'] = normalized_project
+        record['user_id'], record['username'] = normalized_user
+        valid.append(record)
     return (valid, invalid)
 
 
 def upload_csv_cohort_finish():
-    cohort = request.values['cohort_name']
-    users = request.values['users']
+    #cohort = request.values['cohort_name']
+    #users = request.values['users']
+    cohort = 'test_embr1'
+    users = [{'username' : 'Evan (WMF)', 'project' : 'enwiki'}]
+    project = None
+    if project is None:
+        if all([user['project'] == users[0]['project'] for user in users]):
+            project = users[0]['project']
+        else:
+            project = ''
+    uids = [user['uid'] for user in users]
     print cohort
     print users
+    print project
     # re-validate
     available = query_mod.is_valid_cohort_query(cohort)
-    (valid, invalid) = validate_records([])
+    if not available:
+        raise 'cohort name `%s` is no longer available' % (cohort)
+    (valid, invalid) = validate_records(users)
     if invalid:
         raise 'Cohort changed since last validation'
     # save the cohort
+    query_mod.add_cohort_data(cohort, uids, project)
+    #return redirect(url_for('cohorts/%s' % cohort))
     return redirect(url_for('all_cohorts'))
 
 

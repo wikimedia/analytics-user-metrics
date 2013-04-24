@@ -722,8 +722,11 @@ def is_valid_username_query(username, project):
         logging.error(__name__ +
                       ' :: Query failed: {0}, params = {1}'.
                       format(query, str(params)))
-        return False
-    return len(ids) == 1
+        raise
+    if len(ids) == 1:
+        return ids[0]
+    else:
+        return None
 is_valid_username_query.__query_name__ = 'is_valid_username_query'
 
 def is_valid_cohort_query(cohort_name):
