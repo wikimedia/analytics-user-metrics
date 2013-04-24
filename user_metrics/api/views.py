@@ -264,8 +264,12 @@ def upload_csv_cohort_finish():
     if invalid:
         raise Exception('Cohort changed since last validation')
     # save the cohort
+    if not project:
+        if all([user['project'] == users[0]['project'] for user in users]):
+            project = users[0]['project']
     uids = [user['user_id'] for user in users]
-    query_mod.add_cohort_data(cohort, uids, project)
+    logging.debug('cohort: %s, project: %s, uids:\n%s', cohort, project, uids)
+    #query_mod.add_cohort_data(cohort, uids, project)
     #return redirect(url_for('cohorts/%s' % cohort))
     return redirect(url_for('all_cohorts'))
 

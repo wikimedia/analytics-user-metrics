@@ -700,13 +700,16 @@ def is_valid_uid_query(uid, project):
     params = {'uid' : int(uid)}
     conn._cur_.execute(query, params) 
     try:
-        ids = conn._cur_.fetchall()
+        usernames = conn._cur_.fetchall()
     except (OperationalError, ProgrammingError) as e:
         logging.error(__name__ +
                       ' :: Query failed: {0}, params = {1}'.
                       format(query, str(params)))
         return False
-    return len(ids) == 1
+    if len(usernames) == 1:
+        return usernames[0][0]
+    else:
+        return None
 is_valid_uid_query.__query_name__ = 'is_valid_uid_query'
 
 
@@ -724,7 +727,7 @@ def is_valid_username_query(username, project):
                       format(query, str(params)))
         raise
     if len(ids) == 1:
-        return ids[0]
+        return ids[0][0]
     else:
         return None
 is_valid_username_query.__query_name__ = 'is_valid_username_query'
