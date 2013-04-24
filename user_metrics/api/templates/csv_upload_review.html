@@ -68,8 +68,17 @@
         });
 
         $('form.finish-upload').submit(function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            
             form = $(this);
-            $.post(form.attr('action'), {users: valid(), cohort_name: cohort_name});
+            $.post(form.attr('action'), {
+                users: JSON.stringify(valid),
+                cohort_name: cohort_name,
+                cohort_project: cohort_project
+            }, function(data){
+                location.href = data;
+            });
         });
     });
 </script>

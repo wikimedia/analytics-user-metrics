@@ -227,6 +227,22 @@ def validate_records(records):
             invalid.append(record)
     return (valid, invalid)
 
+#def upload_csv_cohort_finish():
+    #cohort = request.form.get('cohort_name')
+    #users_json = request.form.get('users')
+    #print users_json
+    #users = json.loads(users_json)
+    ## re-validate
+    #available = query_mod.is_valid_cohort_query(cohort)
+    #(valid, invalid) = validate_records(users)
+    #if invalid:
+        #raise 'Cohort changed since last validation'
+    ## save the cohort
+    #print valid
+    #print cohort
+    #return url_for('all_cohorts')
+
+
 
 def upload_csv_cohort_finish():
     cohort = request.values['cohort_name']
