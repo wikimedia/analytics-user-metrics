@@ -162,7 +162,9 @@ def all_metrics():
 def upload_csv_cohort():
     """ View for uploading and validating a new cohort via CSV """
     if request.method == 'GET':
-        return render_template('csv_upload.html')
+        return render_template('csv_upload.html',
+            wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
+        )
 
     elif request.method == 'POST':
         file = request.files['csv_cohort']
@@ -226,6 +228,20 @@ def validate_records(records):
             record['reason_invalid'] = 'not recognized as user_name or user_id'
             invalid.append(record)
     return (valid, invalid)
+
+
+def upload_csv_cohort_finish():
+    cohort = request.values['cohort_name']
+    users = request.values['users']
+    print cohort
+    print users
+    # re-validate
+    available = query_mod.is_valid_cohort_query(cohort)
+    (valid, invalid) = validate_records([])
+    if invalid:
+        raise 'Cohort changed since last validation'
+    # save the cohort
+    return redirect(url_for('all_cohorts'))
 
 
 def metric(metric=''):
@@ -441,6 +457,7 @@ view_list = {
     contact.__name__: contact,
     thin_client_view.__name__: thin_client_view,
     upload_csv_cohort.__name__: upload_csv_cohort,
+    upload_csv_cohort_finish.__name__: upload_csv_cohort_finish,
     validate_cohort_name_allowed.__name__: validate_cohort_name_allowed
 }
 
@@ -457,8 +474,9 @@ route_deco = {
     about.__name__: app.route('/about/'),
     contact.__name__: app.route('/contact/'),
     thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>'),
+    upload_csv_cohort_finish.__name__: app.route('/uploads/cohort/finish', methods=['POST']),
     upload_csv_cohort.__name__: app.route('/uploads/cohort', methods=['POST', 'GET']),
-    validate_cohort_name_allowed.__name__: app.route('/validate/cohort/allowed')
+    validate_cohort_name_allowed.__name__: app.route('/validate/cohort/allowed', methods=['GET'])
 }
 
 # Dict stores flag for login required on view

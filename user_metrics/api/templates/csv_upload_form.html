@@ -7,15 +7,32 @@
         </div>
     </div>
     <div class="control-group">
+        <label for="cohort_project" class="control-label">Wiki Project</label>
+        <div class="controls">
+            <select name="cohort_project" id="cohort_project">
+                {% for project in wiki_projects %}
+                <option>{{ project }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="control-group">
         <label for="csv_cohort" class="control-label">CSV File</label>
         <div class="controls">
             <input type="file" name="csv_cohort" id="csv_cohort" required/>
         </div>
-    </div>
-    <div class="control-group">
-        <label for="cohort_project" class="control-label">Wiki Project</label>
-        <div class="controls">
-            <input type="text" name="cohort_project" id="cohort_project" required/>
+        <div>
+            <h6>File Format</h6>
+            <p>The command line utility (<code>userstats</code>) expects a CSV file with the following format </p>
+            <pre><code>username      project
+Evan (WMF)    en
+            </code></pre>
+            <ul>
+                <li><strong>username</strong>: straightforward utf-8 encoded names or user ids.</li>
+                <li><strong>project</strong>: the langauge or project code on which that username exists and up-to-date list of codes can be found <a href="http://meta.wikimedia.org/wiki/List_of_Wikipedias">here</a> (the actual codes are in the fourth column of the tables, labeled "Wiki") .</li>
+                <!--li><strong>reference date</strong>: a user-specific date which can be used as a reference point to compute certain metrics over relative time periods (i.e. the first month after signing up).  Also, <code>userstats</code> uses <code>datutil.parser</code> to interpret date strings, so you have a little flexibility in the exact date format you use.</li>
+                <li><strong>cohort id</strong>: an arbitrary string identifier which will be used to group users with the same identifier into a cohort, on which you can then aggregate statistics and compare.</li-->
+            </ul>
         </div>
     </div>
     <div class="form-actions">
