@@ -235,46 +235,20 @@ def validate_records(records):
             record['reason_invalid'] = 'invalid user_name / user_id: %s' % record['user_str']
             invalid.append(record)
             continue
-
+        # set the normalized values and append to valid
         logging.debug('found a valid user_str: %s', record['user_str'])
         record['project'] = normalized_project
         record['user_id'], record['username'] = normalized_user
         valid.append(record)
     return (valid, invalid)
 
-#def upload_csv_cohort_finish():
-    #cohort = request.form.get('cohort_name')
-    #project = request.form.get('cohort_project')
-    #users_json = request.form.get('users')
-    #print users_json
-    #users = json.loads(users_json)
-    ## re-validate
-    #available = query_mod.is_valid_cohort_query(cohort)
-    #(valid, invalid) = validate_records(users)
-    #if invalid:
-        #raise 'Cohort changed since last validation'
-    ## save the cohort
-    #print valid
-    #print cohort
-    #return url_for('all_cohorts')
-
-
 
 def upload_csv_cohort_finish():
-    #cohort = request.values['cohort_name']
-    #users = request.values['users']
-    cohort = 'test_embr1'
-    users = [{'username' : 'Evan (WMF)', 'project' : 'enwiki'}]
-    project = None
-    if project is None:
-        if all([user['project'] == users[0]['project'] for user in users]):
-            project = users[0]['project']
-        else:
-            project = ''
-    uids = [user['uid'] for user in users]
-    print cohort
-    print users
-    print project
+    cohort = request.form.get('cohort_name')
+    project = request.form.get('cohort_project')
+    users_json = request.form.get('users')
+    print users_json
+    users = json.loads(users_json)
     # re-validate
     available = query_mod.is_valid_cohort_query(cohort)
     if not available:
@@ -283,6 +257,7 @@ def upload_csv_cohort_finish():
     if invalid:
         raise 'Cohort changed since last validation'
     # save the cohort
+    uids = [user['user_id'] for user in users]
     query_mod.add_cohort_data(cohort, uids, project)
     #return redirect(url_for('cohorts/%s' % cohort))
     return redirect(url_for('all_cohorts'))
