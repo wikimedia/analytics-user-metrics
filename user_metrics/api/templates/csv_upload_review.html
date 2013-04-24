@@ -63,6 +63,20 @@
             invalid: ko.observableArray(invalid),
             valid: ko.observableArray(valid)
         });
+
+        $('.validate_cohort_name').on('click', function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            a = $(this);
+
+            $.get(a.attr('href'), {cohort: $('#csv_cohort_name').val()}, function(data){
+                if (data){
+                    alert('Cohort already exists');
+                } else {
+                    alert('Cohort does not exist');
+                }
+            });
+        });
     });
 </script>
 {% endblock %}
