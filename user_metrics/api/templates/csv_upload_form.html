@@ -1,8 +1,8 @@
 <form enctype="multipart/form-data" action="/uploads/cohort" method="POST" class="form-horizontal">
     <div class="control-group">
-        <label for="csv_cohort_name" class="control-label">Cohort Name</label>
+        <label for="cohort_name" class="control-label">Cohort Name</label>
         <div class="controls">
-            <input type="text" name="csv_cohort_name" id="csv_cohort_name" required value="{% if cohort_name %}{{cohort_name}}{% endif %}"/>
+            <input type="text" name="cohort_name" id="cohort_name" required value="{% if cohort_name %}{{cohort_name}}{% endif %}"/>
             <a class="btn validate_cohort_name" href="/validate/cohort/allowed">Is Available?</a>
         </div>
     </div>
@@ -10,7 +10,7 @@
         <label for="cohort_project" class="control-label">Wiki Project</label>
         <div class="controls">
             <select name="cohort_project" id="cohort_project">
-                <option>(select one or specify in file)</option>
+                <option value="">(select one or specify in file)</option>
                 {% for project in wiki_projects %}
                 <option {% if project == cohort_project %}selected{% endif %}>{{ project }}</option>
                 {% endfor %}
@@ -36,7 +36,7 @@
             event.stopPropagation();
             a = $(this);
 
-            $.get(a.attr('href'), {cohort: $('#csv_cohort_name').val()}, function(response){
+            $.get(a.attr('href'), {cohort_name: $('#cohort_name').val()}, function(response){
                 if (JSON.parse(response)){
                     alert('Available!');
                 } else {

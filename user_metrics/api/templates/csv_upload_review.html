@@ -61,6 +61,7 @@
     var invalid = JSON.parse('{{ invalid_json | safe }}');
     var valid = JSON.parse('{{ valid_json | safe }}');
     var cohort_name = '{{ cohort_name }}';
+    var cohort_project = '{{ cohort_project }}';
     $(document).ready(function(){
         ko.applyBindings({
             invalid: ko.observableArray(invalid),
@@ -72,14 +73,20 @@
             event.stopPropagation();
             
             form = $(this);
-            $.post(form.attr('action'), {
-                users: JSON.stringify(valid),
-                cohort_name: cohort_name,
-                cohort_project: cohort_project
-            }, function(data){
-                location.href = data;
-            });
+            $.ajax({
+                url: form.attr('action'),
+                type: 'post',
+                data: {
+                    users: JSON.stringify(valid),
+                    cohort_name: cohort_name,
+                    cohort_project: cohort_project
+                }
+            }).done(redirect);
         });
     });
+    
+    function redirect(to){
+        location.href = to;
+    };
 </script>
 {% endblock %}

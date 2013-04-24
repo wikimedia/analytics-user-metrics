@@ -168,8 +168,12 @@ def upload_csv_cohort():
 
     elif request.method == 'POST':
         cohort_file = request.files['csv_cohort']
-        cohort_name = request.form['csv_cohort_name']
+        cohort_name = request.form['cohort_name']
         cohort_project = request.form['cohort_project']
+        
+        if not query_mod.is_valid_cohort_query(cohort_name):
+            flash('That Cohort name is already taken.')
+            return redirect('/uploads/cohort')
         
         unparsed = csv.reader(cohort_file.stream)
         unvalidated = parse_records(unparsed, cohort_project)
@@ -186,7 +190,9 @@ def upload_csv_cohort():
         )
 
 def validate_cohort_name_allowed():
-    return json.dumps(query_mod.is_valid_cohort_query(request.args.get('csv_cohort_name')))
+    cohort = request.args.get('cohort_name')
+    available = query_mod.is_valid_cohort_query(cohort)
+    return json.dumps(available)
 
 def parse_records(records, default_project):
     return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records]
@@ -247,15 +253,16 @@ def upload_csv_cohort_finish():
     cohort = request.form.get('cohort_name')
     project = request.form.get('cohort_project')
     users_json = request.form.get('users')
-    print users_json
     users = json.loads(users_json)
     # re-validate
     available = query_mod.is_valid_cohort_query(cohort)
+    print cohort
+    print available
     if not available:
-        raise 'cohort name `%s` is no longer available' % (cohort)
+        raise Exception('cohort name `%s` is no longer available' % (cohort))
     (valid, invalid) = validate_records(users)
     if invalid:
-        raise 'Cohort changed since last validation'
+        raise Exception('Cohort changed since last validation')
     # save the cohort
     uids = [user['user_id'] for user in users]
     query_mod.add_cohort_data(cohort, uids, project)
