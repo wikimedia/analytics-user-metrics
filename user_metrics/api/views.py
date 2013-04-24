@@ -169,7 +169,14 @@ def upload_csv_cohort():
         
         unvalidated = parse_records(unparsed, request.form['cohort_project'])
         (valid, invalid) = validate_records(unvalidated)
-        return render_template('csv_upload_review.html', valid=json.dumps(valid), invalid=json.dumps(invalid))
+        return render_template('csv_upload_review.html',
+            valid=json.dumps(valid),
+            invalid=json.dumps(invalid),
+            cohort_name=request.form['csv_cohort_name']
+        )
+
+def validate_cohort_name_allowed():
+    return query_mod.is_valid_cohort_query(request.form['csv_cohort_name'])
 
 def review_csv_cohort():
     valid = request.form['valid']
@@ -408,7 +415,8 @@ view_list = {
     about.__name__: about,
     contact.__name__: contact,
     thin_client_view.__name__: thin_client_view,
-    upload_csv_cohort.__name__: upload_csv_cohort
+    upload_csv_cohort.__name__: upload_csv_cohort,
+    validate_cohort_name_allowed.__name__: validate_cohort_name_allowed
 }
 
 # Dict stores routing paths for each view
@@ -424,7 +432,8 @@ route_deco = {
     about.__name__: app.route('/about/'),
     contact.__name__: app.route('/contact/'),
     thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>'),
-    upload_csv_cohort.__name__: app.route('/uploads/cohort', methods=['POST', 'GET'])
+    upload_csv_cohort.__name__: app.route('/uploads/cohort', methods=['POST', 'GET']),
+    validate_cohort_name_allowed.__name__: app.route('/validate/cohort/allowed')
 }
 
 # Dict stores flag for login required on view
