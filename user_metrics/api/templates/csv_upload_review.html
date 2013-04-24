@@ -29,6 +29,8 @@
 </form-->
 {% endif %}
 
+<hr/>
+
 {% if valid %}
 <h4>Valid Users</h4>
 <table class="table table-striped">
@@ -45,37 +47,29 @@
         </tr>
     </tbody>
 </table>
-{% endif %}
 
-<form action="/uploads/cohort/finish" method="POST" class="form-horizontal">
+<form action="/uploads/cohort/finish" method="POST" class="form-horizontal finish-upload">
     <div class="form-actions">
         <input type="submit" class="btn btn-primary" value="{% if invalid %}Upload Only These Valid Users{% else %}Finish Upload{% endif %}"/>
     </div>
 </form>
+{% endif %}
 
 
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 <script>
-    var invalid = JSON.parse('{{ invalid | safe }}');
-    var valid = JSON.parse('{{ valid | safe }}');
+    var invalid = JSON.parse('{{ invalid_json | safe }}');
+    var valid = JSON.parse('{{ valid_json | safe }}');
+    var cohort_name = '{{ cohort_name }}';
     $(document).ready(function(){
         ko.applyBindings({
             invalid: ko.observableArray(invalid),
             valid: ko.observableArray(valid)
         });
 
-        $('.validate_cohort_name').on('click', function(event){
-            event.preventDefault();
-            event.stopPropagation();
-            a = $(this);
-
-            $.get(a.attr('href'), {cohort: $('#csv_cohort_name').val()}, function(data){
-                if (data){
-                    alert('Cohort already exists');
-                } else {
-                    alert('Cohort does not exist');
-                }
-            });
+        $('form.finish-upload').submit(function(event){
+            form = $(this);
+            $.post(form.attr('action'), {users: valid(), cohort_name: cohort_name});
         });
     });
 </script>

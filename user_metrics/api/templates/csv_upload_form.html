@@ -31,11 +31,11 @@
             event.stopPropagation();
             a = $(this);
 
-            $.get(a.attr('href'), {cohort: $('#csv_cohort_name').val()}, function(data){
-                if (data){
-                    alert('Cohort already exists');
+            $.get(a.attr('href'), {cohort: $('#csv_cohort_name').val()}, function(response){
+                if (JSON.parse(response)){
+                    alert('Available!');
                 } else {
-                    alert('Cohort does not exist');
+                    alert('Cohort already exists.');
                 }
                 }).fail(function(){
                     alert('Server Error');

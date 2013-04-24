@@ -171,13 +171,15 @@ def upload_csv_cohort():
         unvalidated = parse_records(unparsed, request.form['cohort_project'])
         (valid, invalid) = validate_records(unvalidated)
         return render_template('csv_upload_review.html',
-            valid=json.dumps(valid),
-            invalid=json.dumps(invalid),
+            valid=valid,
+            invalid=invalid,
+            valid_json=json.dumps(valid),
+            invalid_json=json.dumps(invalid),
             cohort_name=request.form['csv_cohort_name']
         )
 
 def validate_cohort_name_allowed():
-    return query_mod.is_valid_cohort_query(request.form['csv_cohort_name'])
+    return json.dumps(query_mod.is_valid_cohort_query(request.args.get('csv_cohort_name')))
 
 def review_csv_cohort():
     valid = request.form['valid']
