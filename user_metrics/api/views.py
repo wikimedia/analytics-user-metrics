@@ -169,7 +169,7 @@ def upload_csv_cohort():
     elif request.method == 'POST':
         cohort_file = request.files['csv_cohort']
         cohort_name = request.form['csv_cohort_name']
-        cohort_project = request.form['csv_cohort_name']
+        cohort_project = request.form['cohort_project']
         
         unparsed = csv.reader(cohort_file.stream)
         unvalidated = parse_records(unparsed, cohort_project)
