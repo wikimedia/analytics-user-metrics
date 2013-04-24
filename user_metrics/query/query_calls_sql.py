@@ -660,8 +660,6 @@ def get_cohort_users(tag_id):
         conn._cur_.execute(ut_query, {'tag_id': int(tag_id)})
     except (ValueError, ProgrammingError, OperationalError):
         raise UMQueryCallError(__name__ + ' :: Failed to retrieve users.')
-
-    for row in conn._cur_:
         yield unicode(row[0])
     del conn
 get_cohort_users.__query_name__ = 'get_cohort_users'
@@ -708,8 +706,25 @@ def is_valid_uid_query(uid, project):
                       ' :: Query failed: {0}, params = {1}'.
                       format(query, str(params)))
         return False
-    return len(ids) != 1
+    return len(ids) == 1
 is_valid_uid_query.__query_name__ = 'is_valid_uid_query'
+
+
+def is_valid_username_query(username, project):
+    conn = Connector(instance=conf.PROJECT_DB_MAP[project])
+    query = query_store[is_valid_username_query.__name__]
+    query = sub_tokens(query, db=escape_var(project))
+    params = {'username' : username}
+    conn._cur_.execute(query, params) 
+    try:
+        ids = conn._cur_.fetchall()
+    except (OperationalError, ProgrammingError) as e:
+        logging.error(__name__ +
+                      ' :: Query failed: {0}, params = {1}'.
+                      format(query, str(params)))
+        return False
+    return len(ids) == 1
+is_valid_username_query.__query_name__ = 'is_valid_username_query'
 
 
 @query_method_deco
@@ -971,9 +986,13 @@ query_store = {
             AND rev_timestamp > %(start)s
             AND rev_timestamp <= %(end)s
     """,
-    is_valid_user_query.__name__ :
+    is_valid_uid_query.__name__ :
     """
         SELECT user_id FROM <database>.user
         WHERE user_id = %(uid)s
-           OR username = %(username)s"""
+    """,
+    is_valid_username_query.__name__ :
+    """
+        SELECT user_id FROM <database>.user
+        WHERE user_name = %(username)s"""
 }

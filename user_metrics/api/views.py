@@ -180,11 +180,15 @@ def validate_records(records):
     valid = []
     invalid = []
     for record in records:
-        if query_mod.mw_username(record[0]):
+        user_str = record[0]
+        if query_mod.is_valid_username_query(user_str, 'enwiki'): 
             valid.append(record)
-        elif query_mod.is_valid_uid(record[0]):
+            logging.debug('found a valid username: %s', user_str)
+        elif user_str.isdigit() and query_mod.is_valid_uid_query(user_str, 'enwiki'):
+            logging.debug('found a valid uid: %s', user_str)
             valid.append(record)
         else:
+            logging.debug('found an invalid user_str: %s', user_str)
             invalid.append(record)
     return (valid, invalid)
 
@@ -440,3 +444,4 @@ for key in route_deco:
     route = route_deco[key]
     view_method = view_list[key]
     view_list[key] = route(view_method)
+
