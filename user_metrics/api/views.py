@@ -40,6 +40,7 @@ from user_metrics.api.session import APIUser
 # upload files
 from werkzeug import secure_filename
 import csv
+import json
 UPLOAD_FOLDER = 'csv_uploads'
 ALLOWED_EXTENSIONS = set(['csv'])
 
@@ -162,12 +163,13 @@ def upload_csv_cohort():
     if request.method == 'GET':
         return render_template('csv_upload.html')
 
-    else:
+    elif request.method == 'POST':
         file = request.files['csv_cohort']
-        unvalidated = csv.reader(file.stream)
+        unparsed = csv.reader(file.stream)
         
+        unvalidated = parse_records(unparsed, request.form['cohort_project'])
         (valid, invalid) = validate_records(unvalidated)
-        return render_template('csv_upload_review.html', valid=valid, invalid=invalid)
+        return render_template('csv_upload_review.html', valid=json.dumps(valid), invalid=json.dumps(invalid))
 
 def review_csv_cohort():
     valid = request.form['valid']
@@ -176,19 +178,24 @@ def review_csv_cohort():
     #valid.append(new_valid)
     return (valid, invalid) # as json
 
+def parse_records(records, default_project):
+    return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records]
+
 def validate_records(records):
     valid = []
     invalid = []
     for record in records:
-        user_str = record[0]
-        if query_mod.is_valid_username_query(user_str, 'enwiki'): 
+        user_str = record['username']
+        project = record['project']
+        if query_mod.is_valid_username_query(user_str, project): 
             valid.append(record)
             logging.debug('found a valid username: %s', user_str)
-        elif user_str.isdigit() and query_mod.is_valid_uid_query(user_str, 'enwiki'):
+        elif user_str.isdigit() and query_mod.is_valid_uid_query(user_str, project):
             logging.debug('found a valid uid: %s', user_str)
             valid.append(record)
         else:
             logging.debug('found an invalid user_str: %s', user_str)
+            record['reason_invalid'] = 'not recognized as user_name or user_id'
             invalid.append(record)
     return (valid, invalid)
 

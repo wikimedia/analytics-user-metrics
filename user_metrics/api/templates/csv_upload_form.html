@@ -1,0 +1,17 @@
+<form enctype="multipart/form-data" action="/uploads/cohort" method="POST" class="form-horizontal">
+    <div class="control-group">
+        <label for="csv_cohort" class="control-label">CSV File</label>
+        <div class="controls">
+            <input type="file" name="csv_cohort" id="csv_cohort" required/>
+        </div>
+    </div>
+    <div class="control-group">
+        <label for="cohort_project" class="control-label">Wiki Project</label>
+        <div class="controls">
+            <input type="text" name="cohort_project" id="cohort_project" required/>
+        </div>
+    </div>
+    <div class="form-actions">
+        <input type="submit" class="btn btn-primary" value="Upload CSV"/>
+    </div>
+</form>
