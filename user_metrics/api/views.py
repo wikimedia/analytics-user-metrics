@@ -229,6 +229,7 @@ def validate_records(records):
 
 #def upload_csv_cohort_finish():
     #cohort = request.form.get('cohort_name')
+    #project = request.form.get('cohort_project')
     #users_json = request.form.get('users')
     #print users_json
     #users = json.loads(users_json)
