@@ -250,16 +250,14 @@ def validate_records(records):
 
 
 def upload_csv_cohort_finish():
-    cohort = request.form.get('cohort_name')
+    cohort_name = request.form.get('cohort_name')
     project = request.form.get('cohort_project')
     users_json = request.form.get('users')
     users = json.loads(users_json)
     # re-validate
-    available = query_mod.is_valid_cohort_query(cohort)
-    print cohort
-    print available
+    available = query_mod.is_valid_cohort_query(cohort_name)
     if not available:
-        raise Exception('cohort name `%s` is no longer available' % (cohort))
+        raise Exception('cohort name `%s` is no longer available' % (cohort_name))
     (valid, invalid) = validate_records(users)
     if invalid:
         raise Exception('Cohort changed since last validation')
@@ -267,11 +265,11 @@ def upload_csv_cohort_finish():
     if not project:
         if all([user['project'] == users[0]['project'] for user in users]):
             project = users[0]['project']
-    uids = [user['user_id'] for user in users]
-    logging.debug('cohort: %s, project: %s, uids:\n%s', cohort, project, uids)
-    #query_mod.add_cohort_data(cohort, uids, project)
+    logging.debug('cohort: %s, project: %s', cohort_name, project)
+    query_mod.create_cohort(cohort_name, project)
+    query_mod.add_cohort_users(cohort_name, valid)
     #return redirect(url_for('cohorts/%s' % cohort))
-    return redirect(url_for('all_cohorts'))
+    return url_for('all_cohorts')
 
 
 def metric(metric=''):
