@@ -265,11 +265,12 @@ def upload_csv_cohort_finish():
     if not project:
         if all([user['project'] == users[0]['project'] for user in users]):
             project = users[0]['project']
-    logging.debug('cohort: %s, project: %s', cohort_name, project)
-    query_mod.create_cohort(cohort_name, project)
+    logging.debug('adding cohort: %s, with project: %s', cohort_name, project)
+    owner_id = current_user.id
+    query_mod.create_cohort(cohort_name, project, owner=owner_id)
     query_mod.add_cohort_users(cohort_name, valid)
-    #return redirect(url_for('cohorts/%s' % cohort))
-    return url_for('all_cohorts')
+    return url_for('cohort', cohort=cohort_name)
+    #return url_for('all_cohorts')
 
 
 def metric(metric=''):
