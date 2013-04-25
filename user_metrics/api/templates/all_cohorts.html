@@ -2,7 +2,8 @@
 {% block body %}
 <h2>Cohorts</h2>
 {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-<p>This is a list of currently available cohorts:</p>
+
+<p>This is a list of currently available cohorts.  You can also <a href="/uploads/cohort">upload a new Cohort</a>.</p>
 <table class="table table-striped">
     <tbody>
     {% for cohort in data %}
