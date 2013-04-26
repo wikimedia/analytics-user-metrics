@@ -226,6 +226,23 @@ def normalize_user(user_str, project):
     else:
         return None
 
+def deduplicate(list_of_objects, key_function):
+    uniques = dict()
+    for o in list_of_objects:
+        key = key_function(o)
+        if not key in uniques:
+            uniques[key] = o
+    
+    return uniques.values()
+
+def project_name_for_link(project):
+    if project.endswith('wiki'):
+        return project[:len(project)-4]
+    return project
+
+def link_to_user_page(username, project):
+    project = project_name_for_link(project)
+    return 'https://%s.wikipedia.org/wiki/User:%s' % (project, username)
 
 def validate_records(records):
     valid = []
@@ -246,19 +263,12 @@ def validate_records(records):
         logging.debug('found a valid user_str: %s', record['user_str'])
         record['project'] = normalized_project
         record['user_id'], record['username'] = normalized_user
+        record['link'] = link_to_user_page(record['username'], normalized_project)
         valid.append(record)
     
     valid = deduplicate(valid, lambda record: record['username'])
     return (valid, invalid)
 
-def deduplicate(list_of_objects, key_function):
-    uniques = dict()
-    for o in list_of_objects:
-        key = key_function(o)
-        if not key in uniques:
-            uniques[key] = o
-    
-    return uniques.values()
 
 def upload_csv_cohort_finish():
     cohort_name = request.form.get('cohort_name')
