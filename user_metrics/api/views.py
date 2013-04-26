@@ -42,6 +42,7 @@ import user_metrics.config.settings as conf
 from werkzeug import secure_filename
 import csv
 import json
+from itertools import groupby
 UPLOAD_FOLDER = 'csv_uploads'
 ALLOWED_EXTENSIONS = set(['csv'])
 
@@ -246,8 +247,18 @@ def validate_records(records):
         record['project'] = normalized_project
         record['user_id'], record['username'] = normalized_user
         valid.append(record)
+    
+    valid = deduplicate(valid, lambda record: record['username'])
     return (valid, invalid)
 
+def deduplicate(list_of_objects, key_function):
+    uniques = dict()
+    for o in list_of_objects:
+        key = key_function(o)
+        if not key in uniques:
+            uniques[key] = o
+    
+    return uniques.values()
 
 def upload_csv_cohort_finish():
     cohort_name = request.form.get('cohort_name')
