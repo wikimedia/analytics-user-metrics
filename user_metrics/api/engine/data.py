@@ -53,6 +53,7 @@ from re import search
 from collections import OrderedDict
 from hashlib import sha1
 import cPickle
+import os
 
 import user_metrics.etl.data_loader as dl
 from user_metrics.config import logging
@@ -254,17 +255,17 @@ def get_url_from_keys(keys, path_root):
 
 def read_pickle_data():
     try:
-        with open(settings.__data_file_dir__ +
-                  'api_data.pkl', 'rb') as pkl_file:
+        with open(os.path.join(settings.__data_file_dir__,
+                  'api_data.pkl'), 'rb') as pkl_file:
             return cPickle.load(pkl_file)
     except IOError:
-        with open(settings.__data_file_dir__ +
-                  'api_data.pkl', 'wb') as pkl_file:
+        with open(os.path.join(settings.__data_file_dir__,
+                  'api_data.pkl'), 'wb') as pkl_file:
             data = OrderedDict()
             cPickle.dump(data, pkl_file)
             return data
 
 def write_pickle_data(obj):
-    with open(settings.__data_file_dir__ +
-              'api_data.pkl', 'wb') as pkl_file:
+    with open(os.path.join(settings.__data_file_dir__,
+              'api_data.pkl'), 'wb') as pkl_file:
         cPickle.dump(obj, pkl_file)
