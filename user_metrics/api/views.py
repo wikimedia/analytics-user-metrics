@@ -203,15 +203,12 @@ def normalize_project(project):
     if project in conf.PROJECT_DB_MAP:
         return project
     else:
-        if project.endswith('wiki'):
+        # try adding wiki to end
+        new_proj = project + 'wiki'
+        if new_proj not in conf.PROJECT_DB_MAP:
             return None
         else:
-            # try adding wiki to end
-            new_proj = project + 'wiki'
-            if new_proj not in conf.PROJECT_DB_MAP:
-                return None
-            else:
-                return new_proj
+            return new_proj
 
 def normalize_user(user_str, project):
     uid = query_mod.is_valid_username_query(user_str, project)
