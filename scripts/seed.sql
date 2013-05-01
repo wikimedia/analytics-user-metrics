@@ -19,10 +19,9 @@
 -- Table structure for table `revision`
 --
 
-DROP TABLE IF EXISTS `revision`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `revision` (
+CREATE TABLE IF NOT EXISTS `revision` (
   `rev_id` int(10) unsigned NOT NULL DEFAULT '0',
   `rev_page` int(10) unsigned NOT NULL,
   `rev_text_id` int(10) unsigned NOT NULL,
@@ -54,10 +53,9 @@ UNLOCK TABLES;
 -- Table structure for table `page`
 --
 
-DROP TABLE IF EXISTS `page`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `page` (
+CREATE TABLE IF NOT EXISTS `page` (
   `page_id` int(10) unsigned NOT NULL DEFAULT '0',
   `page_namespace` int(11) NOT NULL,
   `page_title` varbinary(255) NOT NULL,
@@ -101,10 +99,9 @@ UNLOCK TABLES;
 -- Table structure for table `user`
 --
 
-DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user` (
+CREATE TABLE IF NOT EXISTS `user` (
   `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_name` varbinary(255) NOT NULL DEFAULT '',
   `user_real_name` varbinary(255) NOT NULL DEFAULT '',
