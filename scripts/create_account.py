@@ -5,10 +5,14 @@
 #For puppet from drdee
 
 import argparse
-from user_metrics.api.session import APIUser
+import sys
+sys.path.append('../')
+
+from user_metrics.api import session
+
 
 def create_user(username, password):
-	u = APIUser(username)
+	u = session.APIUser(username)
 	u.set_password(password)
 	u.register_user()
 
