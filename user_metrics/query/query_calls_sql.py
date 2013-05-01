@@ -1075,7 +1075,7 @@ query_store = {
     """,
     is_valid_uid_query.__name__ :
     """
-        SELECT user_id FROM <database>.user
+        SELECT user_name FROM <database>.user
         WHERE user_id = %(uid)s
     """,
     is_valid_username_query.__name__ :
