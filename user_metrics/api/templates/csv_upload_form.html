@@ -1,0 +1,50 @@
+<form enctype="multipart/form-data" action="/uploads/cohort" method="POST" class="form-horizontal">
+    <div class="control-group">
+        <label for="cohort_name" class="control-label">Cohort Name</label>
+        <div class="controls">
+            <input type="text" name="cohort_name" id="cohort_name" required value="{% if cohort_name %}{{cohort_name}}{% endif %}"/>
+            <a class="btn validate_cohort_name" href="/validate/cohort/allowed">Is Available?</a>
+        </div>
+    </div>
+    <div class="control-group">
+        <label for="cohort_project" class="control-label">Wiki Project</label>
+        <div class="controls">
+            <select name="cohort_project" id="cohort_project">
+                <option value="">(select one or specify in file)</option>
+                {% for project in wiki_projects %}
+                <option {% if project == cohort_project %}selected{% endif %}>{{ project }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="control-group">
+        <label for="csv_cohort" class="control-label">CSV File</label>
+        <div class="controls">
+            <input type="file" name="csv_cohort" id="csv_cohort" required/>
+        </div>
+    </div>
+    <div class="form-actions">
+        <input type="submit" class="btn btn-primary" value="Upload CSV"/>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function(){
+
+        $('.validate_cohort_name').on('click', function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            a = $(this);
+
+            $.get(a.attr('href'), {cohort_name: $('#cohort_name').val()}, function(response){
+                if (JSON.parse(response)){
+                    alert('Available!');
+                } else {
+                    alert('Cohort already exists.');
+                }
+                }).fail(function(){
+                    alert('Server Error');
+                });
+            });
+        });
+</script>

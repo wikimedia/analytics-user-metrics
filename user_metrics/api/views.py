@@ -10,11 +10,13 @@
 
 __author__ = {
     "dario taraborelli": "dario@wikimedia.org",
-    "ryan faulkner": "rfaulkner@wikimedia.org"
+    "ryan faulkner": "rfaulkner@wikimedia.org",
+    "dan andreescu": "dandreescu@wikimedia.org"
 }
 __date__ = "2012-12-21"
 __license__ = "GPL (version 2 or later)"
 
+import os
 
 from flask import Flask, render_template, Markup, redirect, url_for, \
     request, escape, flash, jsonify, make_response
@@ -33,9 +35,22 @@ from user_metrics.api.engine.request_manager import api_request_queue, \
     req_cb_get_cache_keys, req_cb_get_url, req_cb_get_is_running
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.api.session import APIUser
+import user_metrics.config.settings as conf
+
+
+# upload files
+from werkzeug import secure_filename
+import csv
+import json
+from itertools import groupby
+UPLOAD_FOLDER = 'csv_uploads'
+ALLOWED_EXTENSIONS = set(['csv'])
+
 
 # Instantiate flask app
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # REGEX to identify refresh flags in the URL
 REFRESH_REGEX = r'refresh[^&]*&|\?refresh[^&]*$|&refresh[^&]*$'
@@ -143,6 +158,137 @@ def all_metrics():
         return metric(request.form['selectMetric'])
     else:
         return render_template('all_metrics.html')
+
+
+def upload_csv_cohort():
+    """ View for uploading and validating a new cohort via CSV """
+    if request.method == 'GET':
+        return render_template('csv_upload.html',
+            wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
+        )
+
+    elif request.method == 'POST':
+        cohort_file = request.files['csv_cohort']
+        cohort_name = request.form['cohort_name']
+        cohort_project = request.form['cohort_project']
+        
+        if not query_mod.is_valid_cohort_query(cohort_name):
+            flash('That Cohort name is already taken.')
+            return redirect('/uploads/cohort')
+        
+        unparsed = csv.reader(cohort_file.stream)
+        unvalidated = parse_records(unparsed, cohort_project)
+        (valid, invalid) = validate_records(unvalidated)
+        
+        return render_template('csv_upload_review.html',
+            valid=valid,
+            invalid=invalid,
+            valid_json=json.dumps(valid),
+            invalid_json=json.dumps(invalid),
+            cohort_name=cohort_name,
+            cohort_project=cohort_project,
+            wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
+        )
+
+def validate_cohort_name_allowed():
+    cohort = request.args.get('cohort_name')
+    available = query_mod.is_valid_cohort_query(cohort)
+    return json.dumps(available)
+
+def parse_records(records, default_project):
+    return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records]
+
+def normalize_project(project):
+    project = project.strip().lower()
+    if project in conf.PROJECT_DB_MAP:
+        return project
+    else:
+        # try adding wiki to end
+        new_proj = project + 'wiki'
+        if new_proj not in conf.PROJECT_DB_MAP:
+            return None
+        else:
+            return new_proj
+
+def normalize_user(user_str, project):
+    uid = query_mod.is_valid_username_query(user_str, project)
+    if uid is not None:
+        return (uid, user_str)
+    elif user_str.isdigit():
+        username = query_mod.is_valid_uid_query(user_str, project)
+        if username is not None:
+            return (user_str, username)
+        else:
+            return None
+    else:
+        return None
+
+def deduplicate(list_of_objects, key_function):
+    uniques = dict()
+    for o in list_of_objects:
+        key = key_function(o)
+        if not key in uniques:
+            uniques[key] = o
+    
+    return uniques.values()
+
+def project_name_for_link(project):
+    if project.endswith('wiki'):
+        return project[:len(project)-4]
+    return project
+
+def link_to_user_page(username, project):
+    project = project_name_for_link(project)
+    return 'https://%s.wikipedia.org/wiki/User:%s' % (project, username)
+
+def validate_records(records):
+    valid = []
+    invalid = []
+    for record in records:
+        record['user_str'] = record['username']
+        normalized_project = normalize_project(record['project'])
+        if normalized_project is None:
+            record['reason_invalid'] = 'invalid project: %s' % record['project']
+            invalid.append(record)
+            continue
+        normalized_user = normalize_user(record['user_str'], normalized_project)
+        if normalized_user is None:
+            record['reason_invalid'] = 'invalid user_name / user_id: %s' % record['user_str']
+            invalid.append(record)
+            continue
+        # set the normalized values and append to valid
+        logging.debug('found a valid user_str: %s', record['user_str'])
+        record['project'] = normalized_project
+        record['user_id'], record['username'] = normalized_user
+        record['link'] = link_to_user_page(record['username'], normalized_project)
+        valid.append(record)
+    
+    valid = deduplicate(valid, lambda record: record['username'])
+    return (valid, invalid)
+
+
+def upload_csv_cohort_finish():
+    cohort_name = request.form.get('cohort_name')
+    project = request.form.get('cohort_project')
+    users_json = request.form.get('users')
+    users = json.loads(users_json)
+    # re-validate
+    available = query_mod.is_valid_cohort_query(cohort_name)
+    if not available:
+        raise Exception('cohort name `%s` is no longer available' % (cohort_name))
+    (valid, invalid) = validate_records(users)
+    if invalid:
+        raise Exception('Cohort changed since last validation')
+    # save the cohort
+    if not project:
+        if all([user['project'] == users[0]['project'] for user in users]):
+            project = users[0]['project']
+    logging.debug('adding cohort: %s, with project: %s', cohort_name, project)
+    owner_id = current_user.id
+    query_mod.create_cohort(cohort_name, project, owner=owner_id)
+    query_mod.add_cohort_users(cohort_name, valid)
+    return url_for('cohort', cohort=cohort_name)
+    #return url_for('all_cohorts')
 
 
 def metric(metric=''):
@@ -356,7 +502,10 @@ view_list = {
     all_metrics.__name__: all_metrics,
     about.__name__: about,
     contact.__name__: contact,
-    thin_client_view.__name__: thin_client_view
+    thin_client_view.__name__: thin_client_view,
+    upload_csv_cohort.__name__: upload_csv_cohort,
+    upload_csv_cohort_finish.__name__: upload_csv_cohort_finish,
+    validate_cohort_name_allowed.__name__: validate_cohort_name_allowed
 }
 
 # Dict stores routing paths for each view
@@ -371,33 +520,30 @@ route_deco = {
     all_metrics.__name__: app.route('/metrics/', methods=['POST', 'GET']),
     about.__name__: app.route('/about/'),
     contact.__name__: app.route('/contact/'),
-    thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>')
+    thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>'),
+    upload_csv_cohort_finish.__name__: app.route('/uploads/cohort/finish', methods=['POST']),
+    upload_csv_cohort.__name__: app.route('/uploads/cohort', methods=['POST', 'GET']),
+    validate_cohort_name_allowed.__name__: app.route('/validate/cohort/allowed', methods=['GET'])
 }
 
 # Dict stores flag for login required on view
-login_req_deco = {
-    api_root.__name__: False,
-    all_urls.__name__: True,
-    job_queue.__name__: True,
-    output.__name__: True,
-    cohort.__name__: True,
-    all_cohorts.__name__: True,
-    metric.__name__: True,
-    all_metrics.__name__: False,
-    about.__name__: False,
-    contact.__name__: False,
-    thin_client_view.__name__: False
-}
+views_with_anonymous_access = [
+    api_root.__name__,
+    all_metrics.__name__,
+    about.__name__,
+    contact.__name__,
+    thin_client_view.__name__
+]
 
 # Apply decorators to views
 
 if settings.__flask_login_exists__:
-    for key in login_req_deco:
-        view_method = view_list[key]
-        if login_req_deco[key]:
-            view_list[key] = login_required(view_method)
+    for key in view_list:
+        if key not in views_with_anonymous_access:
+            view_list[key] = login_required(view_list[key])
 
 for key in route_deco:
     route = route_deco[key]
     view_method = view_list[key]
     view_list[key] = route(view_method)
+
