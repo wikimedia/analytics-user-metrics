@@ -168,27 +168,32 @@ def upload_csv_cohort():
         )
 
     elif request.method == 'POST':
-        cohort_file = request.files['csv_cohort']
-        cohort_name = request.form['cohort_name']
-        cohort_project = request.form['cohort_project']
-        
-        if not query_mod.is_valid_cohort_query(cohort_name):
-            flash('That Cohort name is already taken.')
+        try:
+            cohort_file = request.files['csv_cohort']
+            cohort_name = request.form['cohort_name']
+            cohort_project = request.form['cohort_project']
+            
+            if not query_mod.is_valid_cohort_query(cohort_name):
+                flash('That Cohort name is already taken.')
+                return redirect('/uploads/cohort')
+            
+            unparsed = csv.reader(cohort_file.stream)
+            unvalidated = parse_records(unparsed, cohort_project)
+            (valid, invalid) = validate_records(unvalidated)
+            
+            return render_template('csv_upload_review.html',
+                valid=valid,
+                invalid=invalid,
+                valid_json=json.dumps(valid),
+                invalid_json=json.dumps(invalid),
+                cohort_name=cohort_name,
+                cohort_project=cohort_project,
+                wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
+            )
+        except Exception, e:
+            logging.debug(str(e))
+            flash('The file you uploaded was not in a valid format, or could not be validated.')
             return redirect('/uploads/cohort')
-        
-        unparsed = csv.reader(cohort_file.stream)
-        unvalidated = parse_records(unparsed, cohort_project)
-        (valid, invalid) = validate_records(unvalidated)
-        
-        return render_template('csv_upload_review.html',
-            valid=valid,
-            invalid=invalid,
-            valid_json=json.dumps(valid),
-            invalid_json=json.dumps(invalid),
-            cohort_name=cohort_name,
-            cohort_project=cohort_project,
-            wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
-        )
 
 def validate_cohort_name_allowed():
     cohort = request.args.get('cohort_name')
@@ -268,27 +273,32 @@ def validate_records(records):
 
 
 def upload_csv_cohort_finish():
-    cohort_name = request.form.get('cohort_name')
-    project = request.form.get('cohort_project')
-    users_json = request.form.get('users')
-    users = json.loads(users_json)
-    # re-validate
-    available = query_mod.is_valid_cohort_query(cohort_name)
-    if not available:
-        raise Exception('cohort name `%s` is no longer available' % (cohort_name))
-    (valid, invalid) = validate_records(users)
-    if invalid:
-        raise Exception('Cohort changed since last validation')
-    # save the cohort
-    if not project:
-        if all([user['project'] == users[0]['project'] for user in users]):
-            project = users[0]['project']
-    logging.debug('adding cohort: %s, with project: %s', cohort_name, project)
-    owner_id = current_user.id
-    query_mod.create_cohort(cohort_name, project, owner=owner_id)
-    query_mod.add_cohort_users(cohort_name, valid)
-    return url_for('cohort', cohort=cohort_name)
-    #return url_for('all_cohorts')
+    try:
+        cohort_name = request.form.get('cohort_name')
+        project = request.form.get('cohort_project')
+        users_json = request.form.get('users')
+        users = json.loads(users_json)
+        # re-validate
+        available = query_mod.is_valid_cohort_query(cohort_name)
+        if not available:
+            raise Exception('cohort name `%s` is no longer available' % (cohort_name))
+        (valid, invalid) = validate_records(users)
+        if invalid:
+            raise Exception('Cohort changed since last validation')
+        # save the cohort
+        if not project:
+            if all([user['project'] == users[0]['project'] for user in users]):
+                project = users[0]['project']
+        logging.debug('adding cohort: %s, with project: %s', cohort_name, project)
+        owner_id = current_user.id
+        query_mod.create_cohort(cohort_name, project, owner=owner_id)
+        query_mod.add_cohort_users(cohort_name, valid)
+        return url_for('cohort', cohort=cohort_name)
+        #return url_for('all_cohorts')
+    except Exception, e:
+        logging.debug(str(e))
+        flash('There was a problem finishing the upload.  The cohort was not saved.')
+        return redirect('/uploads/cohort')
 
 
 def metric(metric=''):
