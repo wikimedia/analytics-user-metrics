@@ -172,6 +172,9 @@ def upload_csv_cohort():
             cohort_file = request.files['csv_cohort']
             cohort_name = request.form['cohort_name']
             cohort_project = request.form['cohort_project']
+            if not cohort_file or not cohort_name or len(cohort_name) is 0:
+                flash('The form was invalid, please select a file and name the cohort.')
+                return redirect('/uploads/cohort')
             
             if not query_mod.is_valid_cohort_query(cohort_name):
                 flash('That Cohort name is already taken.')
@@ -191,8 +194,8 @@ def upload_csv_cohort():
                 wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
             )
         except Exception, e:
-            logging.debug(str(e))
-            flash('The file you uploaded was not in a valid format, or could not be validated.')
+            logging.exception()
+            flash('The file you uploaded was not in a valid format, could not be validated, or the project you specified is not configured on this instance of User Metrics API.')
             return redirect('/uploads/cohort')
 
 def validate_cohort_name_allowed():
@@ -244,7 +247,7 @@ def project_name_for_link(project):
 
 def link_to_user_page(username, project):
     project = project_name_for_link(project)
-    return 'https://%s.wikipedia.org/wiki/User:%s' % (project, username)
+    return 'https://%s.wikipedia.org/wiki/User:%s' % (project.decode('utf8'), username.decode('utf8'))
 
 def validate_records(records):
     valid = []
@@ -293,10 +296,11 @@ def upload_csv_cohort_finish():
         owner_id = current_user.id
         query_mod.create_cohort(cohort_name, project, owner=owner_id)
         query_mod.add_cohort_users(cohort_name, valid)
+        flash('Upload successful, your cohort is in the list below.')
         return url_for('cohort', cohort=cohort_name)
         #return url_for('all_cohorts')
     except Exception, e:
-        logging.debug(str(e))
+        logging.exception()
         flash('There was a problem finishing the upload.  The cohort was not saved.')
         return redirect('/uploads/cohort')
 
