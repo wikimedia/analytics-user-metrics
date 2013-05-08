@@ -83,6 +83,24 @@ CREATE TABLE `usertags_meta` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+
+--
+-- Table structure for table `edit_page_tracking`
+--
+
+DROP TABLE IF EXISTS `edit_page_tracking`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edit_page_tracking` (
+  `ept_user` bigint(20) unsigned NOT NULL,
+  `ept_timestamp` varbinary(14) NOT NULL,
+  `ept_namespace` int(11) NOT NULL,
+  `ept_title` varbinary(255) NOT NULL,
+  KEY `user_timestamp` (`ept_user`,`ept_timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -90,5 +108,6 @@ CREATE TABLE `usertags_meta` (
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
 
 -- Dump completed on 2013-04-23 18:53:55
