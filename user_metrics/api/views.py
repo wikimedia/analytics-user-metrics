@@ -194,7 +194,7 @@ def upload_csv_cohort():
                 wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
             )
         except Exception, e:
-            logging.exception()
+            logging.exception(str(e))
             flash('The file you uploaded was not in a valid format, could not be validated, or the project you specified is not configured on this instance of User Metrics API.')
             return redirect('/uploads/cohort')
 
@@ -204,7 +204,7 @@ def validate_cohort_name_allowed():
     return json.dumps(available)
 
 def parse_records(records, default_project):
-    return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records]
+    return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records if r]
 
 def normalize_project(project):
     project = project.strip().lower()
@@ -281,6 +281,8 @@ def upload_csv_cohort_finish():
         project = request.form.get('cohort_project')
         users_json = request.form.get('users')
         users = json.loads(users_json)
+        for user in users:
+            user['username'] = user['username'].encode('utf8')
         # re-validate
         available = query_mod.is_valid_cohort_query(cohort_name)
         if not available:
@@ -298,11 +300,11 @@ def upload_csv_cohort_finish():
         query_mod.add_cohort_users(cohort_name, valid)
         flash('Upload successful, your cohort is in the list below.')
         return url_for('cohort', cohort=cohort_name)
-        #return url_for('all_cohorts')
+        
     except Exception, e:
-        logging.exception()
+        logging.exception(str(e))
         flash('There was a problem finishing the upload.  The cohort was not saved.')
-        return redirect('/uploads/cohort')
+        return '/uploads/cohort'
 
 
 def metric(metric=''):
