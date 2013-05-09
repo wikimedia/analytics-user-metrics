@@ -23,6 +23,9 @@ Make sure you have vagrant and virtualbox installed.  For this humble author, Va
 right under [this line][line_in_site_pp] add this line:
 
     class { 'user_metrics': }
+
+then run puppet again:
+
     vagrant provision
 
 Now you should be able to browse to [user metrics running locally][local_vagrant_user_metrics_server] and start working.  The code that's being served is under the user\_metrics folder and you can use that like any clone of a gerrit repository.
