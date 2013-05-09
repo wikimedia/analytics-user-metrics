@@ -55,8 +55,10 @@ DEFAULT_PROJECT = 'enwiki'
 # Default group + structure that maps values in the query string to new ones
 DEFAULT_GROUP = 'reg'
 REQUEST_VALUE_MAPPING = {
+    'group': {
         'reg': USER_METRIC_PERIOD_TYPE.REGISTRATION,
         'activity': USER_METRIC_PERIOD_TYPE.INPUT,
+    }
 }
 
 def RequestMetaFactory(cohort_expr, cohort_gen_timestamp, metric_expr):
