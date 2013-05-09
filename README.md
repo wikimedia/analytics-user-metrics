@@ -7,12 +7,33 @@ Introduction
 
 UserMetrics is a set of data analysis tools developed by the Wikimedia Foundation to measure on-site user activity via a set of standardized metrics. Using the modules in this package, a set of key metrics can be selected and applied to an arbitrary list of user IDs to measure their engagement and productivity. UserMetrics is designed for extensibility (creating new metrics, modifying metric parameters) and to support various types of cohort analysis and program evaluation in a user-friendly way. The methods are exposed via a RESTful API that can be used to generate requests and retrieve the results in JSON format.
 
-Installation
-------------
+
+Running on the Mediawiki Vagrant (for development)
+--------------------------------------------------
+
+We have added UserMetrics puppet configuration to [MediaWiki Vagrant][mediawiki_vagrant] to make it easy to get up and running.  Here's how:
+
+Make sure you have vagrant and virtualbox installed.  For this humble author, Vagrant 1.1.2 and VirtualBox 4.2.8 worked well on Ubuntu.
+
+    git clone https://gerrit.wikimedia.org/r/mediawiki/vagrant mediawiki-vagrant
+    cd mediawiki-vagrant
+    vagrant up
+    vim puppet/manifests/site.pp
+
+right under [this line][line_in_site_pp] add this line:
+
+    class { 'user_metrics': }
+    vagrant provision
+
+Now you should be able to browse to [user metrics running locally][local_vagrant_user_metrics_server] and start working.  The code that's being served is under the user\_metrics folder and you can use that like any clone of a gerrit repository.
+
+
+Installation (in production)
+----------------------------
 
 `wmf_user_metrics` is packaged with distutils:
 
-    $ sudo pip install wmf_user_metrics
+    $ sudo pip -e install .
 
 Once installed you will need to modify the configuration files.  This
 can be found in the file `settings.py` under
@@ -136,3 +157,8 @@ Links
 - UserMetrics API: http://metrics.wikimedia.org
 - Project homepage: https://www.mediawiki.org/wiki/UserMetrics
 - Code documentation: http://stat1.wikimedia.org/rfaulk/pydocs/_build/
+
+
+[mediawiki_vagrant]: https://github.com/wikimedia/mediawiki-vagrant "MediaWiki Vagrant on GitHub"
+[line_in_site_pp]: https://github.com/wikimedia/mediawiki-vagrant/blob/53ee094f122dd58c61eae7c7de453e09051d309d/puppet/manifests/site.pp#L54 "class { 'mediawiki': }"
+[local_vagrant_user_metrics_server]: 10.11.12.13:8182 "Local User Metrics Server"
