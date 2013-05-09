@@ -137,7 +137,7 @@ def format_request_params(request_meta):
     if not request_meta.project:
         request_meta.project = DEFAULT_PROJECT
 
-    if not request_meta.group in REQUEST_VALUE_MAPPING:
+    if get_request_type(request_meta) != request_types.raw and not request_meta.group in REQUEST_VALUE_MAPPING:
         request_meta.group = DEFAULT_GROUP
 
     # set the aggregator if there is one
@@ -166,6 +166,8 @@ def _map_request_values(request_meta):
             request_value = None
             try:
                 request_value = getattr(request_meta, attr)
+                if request_value is None:
+                    continue
                 map_val = REQUEST_VALUE_MAPPING[attr][request_value]
                 setattr(request_meta, attr, map_val)
             except KeyError:

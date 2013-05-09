@@ -722,6 +722,8 @@ def get_cohort_users(tag_id):
         conn._cur_.execute(ut_query, {'tag_id': int(tag_id)})
     except (ValueError, ProgrammingError, OperationalError):
         raise UMQueryCallError(__name__ + ' :: Failed to retrieve users.')
+
+    for row in conn._cur_:
         yield unicode(row[0])
     del conn
 get_cohort_users.__query_name__ = 'get_cohort_users'
