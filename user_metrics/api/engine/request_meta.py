@@ -319,7 +319,8 @@ from user_metrics.metrics.edit_rate import EditRate, edit_rate_agg, \
 from user_metrics.metrics.namespace_of_edits import NamespaceEdits, \
     namespace_edits_sum
 from user_metrics.metrics.live_account import LiveAccount, live_accounts_agg
-from user_metrics.metrics.pages_created import PagesCreated
+from user_metrics.metrics.pages_created import PagesCreated, \
+    pages_created_stats_agg
 
 
 # Registered metrics types
@@ -357,6 +358,7 @@ aggregator_dict =\
     'dist+edit_rate': er_stats_agg,
     'proportion+blocks': block_rate_agg,
     'dist+time_to_threshold': ttt_stats_agg,
+    'dist+pages_created': pages_created_stats_agg,
     }
 
 
