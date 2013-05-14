@@ -139,8 +139,10 @@ def api_root():
         return render_template('index_anon.html', cohort_data=data,
                                m_list=get_metric_names())
     else:
-        return render_template('index.html', cohort_data=data,
-                               m_list=get_metric_names())
+        return render_template('index.html',
+            cohort_data=data,
+            m_list=get_metric_names(),
+        )
 
 
 def about():
@@ -149,6 +151,10 @@ def about():
 
 def contact():
     return render_template('contact.html')
+
+
+def version():
+    return render_template('version.html', version=conf.version)
 
 
 def all_metrics():
@@ -521,7 +527,8 @@ view_list = {
     thin_client_view.__name__: thin_client_view,
     upload_csv_cohort.__name__: upload_csv_cohort,
     upload_csv_cohort_finish.__name__: upload_csv_cohort_finish,
-    validate_cohort_name_allowed.__name__: validate_cohort_name_allowed
+    validate_cohort_name_allowed.__name__: validate_cohort_name_allowed,
+    version.__name__: version
 }
 
 # Dict stores routing paths for each view
@@ -539,7 +546,8 @@ route_deco = {
     thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>'),
     upload_csv_cohort_finish.__name__: app.route('/uploads/cohort/finish', methods=['POST']),
     upload_csv_cohort.__name__: app.route('/uploads/cohort', methods=['POST', 'GET']),
-    validate_cohort_name_allowed.__name__: app.route('/validate/cohort/allowed', methods=['GET'])
+    validate_cohort_name_allowed.__name__: app.route('/validate/cohort/allowed', methods=['GET']),
+    version.__name__: app.route('/version')
 }
 
 # Dict stores flag for login required on view

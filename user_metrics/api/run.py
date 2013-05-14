@@ -108,6 +108,7 @@ setup_controller(api_request_queue, api_response_queue,
                  req_notification_queue_in, req_notification_queue_out)
 
 app.config['SECRET_KEY'] = settings.__secret_key__
+app.config['VERSION'] = settings.version
 
 #Send serious errors to devs
 ADMINS = ['dvanliere@wikimedia.org', 'rfaulkner@wikimedia.org']
