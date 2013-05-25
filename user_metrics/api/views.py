@@ -166,6 +166,15 @@ def all_metrics():
         return render_template('all_metrics.html')
 
 
+def normalize_newlines(stream):
+    for line in stream:
+        if '\r' in line:
+            for tok in line.split('\r'):
+                yield tok
+        else:
+            yield line
+
+
 def upload_csv_cohort():
     """ View for uploading and validating a new cohort via CSV """
     if request.method == 'GET':
@@ -186,7 +195,7 @@ def upload_csv_cohort():
                 flash('That Cohort name is already taken.')
                 return redirect('/uploads/cohort')
             
-            unparsed = csv.reader(cohort_file.stream)
+            unparsed = csv.reader(normalize_newlines(cohort_file.stream))
             unvalidated = parse_records(unparsed, cohort_project)
             (valid, invalid) = validate_records(unvalidated)
             
