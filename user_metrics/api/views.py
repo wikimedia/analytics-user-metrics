@@ -25,7 +25,7 @@ from user_metrics.etl.data_loader import Connector
 from user_metrics.config import logging, settings
 from user_metrics.utils import unpack_fields
 from user_metrics.api.engine.data import get_cohort_refresh_datetime, \
-    get_data, get_url_from_keys, build_key_signature, read_pickle_data
+    get_data, get_url_from_keys, build_key_signature, read_pickle_data, get_users
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
     REQ_NCB_LOCK
 from user_metrics.api.engine.request_meta import filter_request_input, \
@@ -219,7 +219,13 @@ def validate_cohort_name_allowed():
     return json.dumps(available)
 
 def parse_records(records, default_project):
-    return [{'username': r[0], 'project': r[1] if len(r) > 1 else default_project} for r in records if r]
+    return [{'username': parse_username(r[0]), 'project': r[1] if len(r) > 1 else default_project} for r in records if r]
+
+def parse_username(raw_name):
+    stripped = str(raw_name).decode('utf8').strip()
+    # unfortunately .title() or .capitalize() don't work
+    # because 'miliMetric'.capitalize() == 'Milimetric'
+    return stripped[0].upper() + stripped[1:]
 
 def normalize_project(project):
     project = project.strip().lower()
@@ -275,7 +281,11 @@ def validate_records(records):
             invalid.append(record)
             continue
         normalized_user = normalize_user(record['user_str'], normalized_project)
+        # make a link to the potential user page even if user doesn't exist
+        # this gives a chance to see any misspelling etc.
+        record['link'] = link_to_user_page(record['username'], normalized_project)
         if normalized_user is None:
+            logging.debug('invalid: %s', record['user_str'])
             record['reason_invalid'] = 'invalid user_name / user_id: %s' % record['user_str']
             invalid.append(record)
             continue
@@ -283,7 +293,6 @@ def validate_records(records):
         logging.debug('found a valid user_str: %s', record['user_str'])
         record['project'] = normalized_project
         record['user_id'], record['username'] = normalized_user
-        record['link'] = link_to_user_page(record['username'], normalized_project)
         valid.append(record)
     
     valid = deduplicate(valid, lambda record: record['username'])
@@ -359,6 +368,8 @@ def cohort(cohort=''):
     if not cohort:
         return redirect(url_for('all_cohorts'))
     else:
+        #return render_template('cohort.html', c_str=cohort,
+                               #m_list=get_metric_names(), error=error, members=get_users(cohort))
         return render_template('cohort.html', c_str=cohort,
                                m_list=get_metric_names(), error=error)
 

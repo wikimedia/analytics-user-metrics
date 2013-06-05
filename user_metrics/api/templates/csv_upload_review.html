@@ -13,7 +13,7 @@
     </thead>
     <tbody data-bind="foreach: invalid">
         <tr>
-            <td data-bind="text: username"></td>
+            <td><a data-bind="text: username, attr: {href: link}" target="_blank"></a></td>
             <td data-bind="text: project"></td>
             <td data-bind="text: reason_invalid"></td>
         </tr>
