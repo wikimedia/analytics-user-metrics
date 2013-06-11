@@ -202,8 +202,8 @@ def upload_csv_cohort():
             return render_template('csv_upload_review.html',
                 valid=valid,
                 invalid=invalid,
-                valid_json=json.dumps(valid),
-                invalid_json=json.dumps(invalid),
+                valid_json=to_safe_json(valid),
+                invalid_json=to_safe_json(invalid),
                 cohort_name=cohort_name,
                 cohort_project=cohort_project,
                 wiki_projects=sorted(conf.PROJECT_DB_MAP.keys())
@@ -213,13 +213,24 @@ def upload_csv_cohort():
             flash('The file you uploaded was not in a valid format, could not be validated, or the project you specified is not configured on this instance of User Metrics API.')
             return redirect('/uploads/cohort')
 
+def to_safe_json(s):
+    return json.dumps(s).replace("'", "\\'").replace('"','\\"')
+
 def validate_cohort_name_allowed():
     cohort = request.args.get('cohort_name')
     available = query_mod.is_valid_cohort_query(cohort)
     return json.dumps(available)
 
 def parse_records(records, default_project):
-    return [{'username': parse_username(r[0]), 'project': r[1] if len(r) > 1 else default_project} for r in records if r]
+    # NOTE: the reason for the crazy -1 and comma joins
+    # is that some users can have commas in their name
+    # TODO: This makes it impossible to add fields to the csv in the future,
+    # so maybe require the project to be the first field and the username to be the last
+    # or maybe change to a tsv format
+    return [{
+        'username': parse_username(",".join([str(p) for p in r[:-1]])),
+        'project': r[-1].decode('utf8') if len(r) > 1 else default_project
+    } for r in records if r]
 
 def parse_username(raw_name):
     stripped = str(raw_name).decode('utf8').strip()
@@ -240,11 +251,12 @@ def normalize_project(project):
             return new_proj
 
 def normalize_user(user_str, project):
-    uid = query_mod.is_valid_username_query(user_str, project)
+    user_str_sql_safe = user_str.encode('utf-8')
+    uid = query_mod.is_valid_username_query(user_str_sql_safe, project)
     if uid is not None:
         return (uid, user_str)
     elif user_str.isdigit():
-        username = query_mod.is_valid_uid_query(user_str, project)
+        username = query_mod.is_valid_uid_query(user_str_sql_safe, project)
         if username is not None:
             return (user_str, username)
         else:
@@ -268,7 +280,7 @@ def project_name_for_link(project):
 
 def link_to_user_page(username, project):
     project = project_name_for_link(project)
-    return 'https://%s.wikipedia.org/wiki/User:%s' % (project.decode('utf8'), username.decode('utf8'))
+    return 'https://%s.wikipedia.org/wiki/User:%s' % (project, username)
 
 def validate_records(records):
     valid = []
@@ -305,8 +317,6 @@ def upload_csv_cohort_finish():
         project = request.form.get('cohort_project')
         users_json = request.form.get('users')
         users = json.loads(users_json)
-        for user in users:
-            user['username'] = user['username'].encode('utf8')
         # re-validate
         available = query_mod.is_valid_cohort_query(cohort_name)
         if not available:
@@ -322,13 +332,12 @@ def upload_csv_cohort_finish():
         owner_id = current_user.id
         query_mod.create_cohort(cohort_name, project, owner=owner_id)
         query_mod.add_cohort_users(cohort_name, valid)
-        flash('Upload successful, your cohort is in the list below.')
         return url_for('cohort', cohort=cohort_name)
         
     except Exception, e:
         logging.exception(str(e))
         flash('There was a problem finishing the upload.  The cohort was not saved.')
-        return '/uploads/cohort'
+        return '<<error>>'
 
 
 def metric(metric=''):

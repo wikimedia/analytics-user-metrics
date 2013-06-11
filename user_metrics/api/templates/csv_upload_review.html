@@ -22,11 +22,6 @@
 
 <h5>Try uploading again after fixing the issues</h5>
 {% include "csv_upload_form.html" %}
-<!--form action="/uploads/cohort/validate" method="POST" class="form-horizontal">
-    <div class="form-actions">
-        <input type="submit" class="btn" value="Re-Check These Users"/>
-    </div>
-</form-->
 {% endif %}
 
 <hr/>
@@ -73,6 +68,9 @@
             event.stopPropagation();
             
             form = $(this);
+            formButton = $('.btn-primary', this);
+            originalFormButtonText = formButton.val();
+            formButton.val('Finishing Upload ...');
             $.ajax({
                 url: form.attr('action'),
                 type: 'post',
@@ -81,12 +79,18 @@
                     cohort_name: cohort_name,
                     cohort_project: cohort_project
                 }
-            }).done(redirect);
+            })
+                .done(function(response){
+                    if (response === '<<error>>'){
+                        alert('There was a problem uploading, visit #wikimedia-analytics on freenode and get help');
+                    } else {
+                        location.href = response;
+                    }
+                })
+                .always(function(){
+                    formButton.val(originalFormButtonText);
+                });
         });
     });
-    
-    function redirect(to){
-        location.href = to;
-    };
 </script>
 {% endblock %}
