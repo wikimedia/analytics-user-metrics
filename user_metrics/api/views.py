@@ -320,11 +320,17 @@ def upload_csv_cohort_finish():
         # re-validate
         available = query_mod.is_valid_cohort_query(cohort_name)
         if not available:
-            raise Exception('cohort name `%s` is no longer available' % (cohort_name))
-        (valid, invalid) = validate_records(users)
-        if invalid:
-            raise Exception('Cohort changed since last validation')
+            raise Exception('Cohort name `%s` is no longer available' % (cohort_name))
+        
+        # TODO: re-enable validation when either
+        # 1. the site is used by external, potentially untrusted users
+        # 2. the performance of validation is improved
+        #(valid, invalid) = validate_records(users)
+        #if invalid:
+            #raise Exception('Cohort changed since last validation')
         # save the cohort
+        valid = users
+        
         if not project:
             if all([user['project'] == users[0]['project'] for user in users]):
                 project = users[0]['project']
