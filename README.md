@@ -35,7 +35,7 @@ Installation (in production)
 ----------------------------
 
 Setup a Virtual Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 (instructions to install a virtualenv here - http://www.virtualenv.org/en/latest/)
 
@@ -45,7 +45,7 @@ Activate with `source <yourenv>/bin/activate`
  
 
 Installing Umapi
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 Run `git clone ssh://rfaulk@gerrit.wikimedia.org:29418/analytics/user-metrics`
 
@@ -53,13 +53,12 @@ Navigate to `user-metrics` and run `pip install -e .`
 
 
 Configure the clone
-~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^
 
-In user_metrics/config run `cp settings.py.example settings.py` and configure as instructed below to point to datasources. 
+In user_metrics/config run `cp settings.py.example settings.py` and configure as instructed below to point to datasources. Ensure that
+datasource hosts are reachable from your environment.  To run the server execute:
 
-`wmf_user_metrics` is packaged with distutils:
-
-    $ sudo pip -e install .
+	$ python user_metrics/api/run.py
 
 Once installed you will need to modify the configuration files.  This
 can be found in the file `settings.py` under
@@ -74,7 +73,8 @@ The template configuration file looks like the following:
 
     # Project settings
     # ================
-
+    
+    version = {% your version %}
     __project_home__ = realpath('../..') + '/'
     __web_home__ = ''.join([__project_home__, 'src/api/'])
     __data_file_dir__ = ''.join([__project_home__, 'data/'])
