@@ -34,6 +34,29 @@ Now you should be able to browse to [user metrics running locally][local_vagrant
 Installation (in production)
 ----------------------------
 
+Setup a Virtual Environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+(instructions to install a virtualenv here - http://www.virtualenv.org/en/latest/)
+
+Create virtualenv with `virtualenv <your virtualenv>`
+
+Activate with `source <yourenv>/bin/activate`
+ 
+
+Installing Umapi
+~~~~~~~~~~~~~~~~
+
+Run `git clone ssh://rfaulk@gerrit.wikimedia.org:29418/analytics/user-metrics`
+
+Navigate to `user-metrics` and run `pip install -e .`
+
+
+Configure the clone
+~~~~~~~~~~~~~~~~~~~
+
+In user_metrics/config run `cp settings.py.example settings.py` and configure as instructed below to point to datasources. 
+
 `wmf_user_metrics` is packaged with distutils:
 
     $ sudo pip -e install .
