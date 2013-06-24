@@ -54,10 +54,10 @@ class Blocks(um.UserMetric):
     _data_model_meta = \
         {
             'id_fields': [0],
-            'date_fields': [2, 3],
+            'date_fields': [3, 4],
             'float_fields': [],
-            'integer_fields': [1, 4],
-            'boolean_fields': [],
+            'integer_fields': [2],
+            'boolean_fields': [1],
         }
 
     _agg_indices = \
@@ -148,7 +148,7 @@ setattr(block_rate_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
                                                     'total_weight',
                                                     'rate'])
 setattr(block_rate_agg, um.METRIC_AGG_METHOD_KWARGS, {
-    'val_idx': 1,
+    'val_idx': 2,
 })
 
 
