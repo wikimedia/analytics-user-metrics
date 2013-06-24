@@ -70,14 +70,14 @@ class Blocks(um.UserMetric):
     def __init__(self, **kwargs):
         super(Blocks, self).__init__(**kwargs)
 
-
+    # TODO: remove ban.  add is_blocked.
     @staticmethod
     def header():
         return ['user_id',
+                'is_blocked',
                 'block_count',
                 'block_first',
-                'block_last',
-                'ban']
+                'block_last']
 
     @um.UserMetric.pre_process_metric_call
     def process(self, users, **kwargs):
@@ -97,8 +97,10 @@ class Blocks(um.UserMetric):
         rowValues = {}
 
         for i in xrange(len(users)):
-            rowValues[users[i]] = {'block_count': 0, 'block_first': -1,
-                                   'block_last': -1, 'ban': -1}
+            rowValues[users[i]] = {'is_blocked': 0,
+                                   'block_count': 0,
+                                   'block_first': -1,
+                                   'block_last': -1}
         # Data calls
         user_map = query_mod.blocks_user_map_query(users, self.project)
         query_args = namedtuple('QueryArgs', 'date_start')(self.datetime_start)
@@ -116,16 +118,18 @@ class Blocks(um.UserMetric):
 
             if type == "block":
                 rowValues[userid]['block_count'] = count
+                rowValues[userid]['is_blocked'] = count > 0
                 rowValues[userid]['block_first'] = first
                 rowValues[userid]['block_last'] = last
 
             elif type == "ban":
                 rowValues[userid][type] = first
 
-        self._results = [[user, rowValues.get(user)['block_count'],
+        self._results = [[user,
+                          rowValues.get(user)['is_blocked'],
+                          rowValues.get(user)['block_count'],
                           rowValues.get(user)['block_first'],
-                          rowValues.get(user)['block_last'],
-                          rowValues.get(user)['ban']]
+                          rowValues.get(user)['block_last']]
                          for user in rowValues.keys()]
         return self
 
