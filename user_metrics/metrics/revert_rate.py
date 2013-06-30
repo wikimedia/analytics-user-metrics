@@ -69,9 +69,9 @@ class RevertRate(um.UserMetric):
     _data_model_meta = {
         'id_fields': [0],
         'date_fields': [],
-        'float_fields': [1],
-        'integer_fields': [2],
-        'boolean_fields': [],
+        'float_fields': [],
+        'integer_fields': [2,3],
+        'boolean_fields': [1],
         }
 
     _agg_indices = {
@@ -84,7 +84,10 @@ class RevertRate(um.UserMetric):
         super(RevertRate, self).__init__(**kwargs)
 
     @staticmethod
-    def header(): return ['user_id', 'revert_rate', 'total_revisions']
+    def header(): return ['user_id', 
+                          'is_reverted',
+                          'revert_count',
+                          'revision_count']
 
     @um.UserMetric.pre_process_metric_call
     def process(self, user_handle, **kwargs):
