@@ -197,10 +197,10 @@ def _process_help(args):
             total_revisions += r[0]
             total_reverts += r[1]
         if not total_revisions:
-            results_agg.append([user_data.user, 0.0, total_revisions])
+            results_agg.append([user_data.user, 0, 0, total_revisions])
         else:
-            results_agg.append([user_data.user, total_reverts / total_revisions,
-                                total_revisions])
+            results_agg.append([user_data.user, total_reverts > 0,
+                                total_reverts, total_revisions])
 
     if thread_args.log_:
         logging.debug(__name__ + ' :: PID {0} complete. Dropped users = {1}'.
