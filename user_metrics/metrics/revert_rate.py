@@ -239,6 +239,6 @@ setattr(revert_rate_avg, um.METRIC_AGG_METHOD_FLAG, True)
 setattr(revert_rate_avg, um.METRIC_AGG_METHOD_NAME, 'revert_rate_avg')
 setattr(revert_rate_avg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
                                                      'total_revisions',
-                                                    'average_rate',])
-setattr(revert_rate_avg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx' : 1,
+                                                     'average_rate',])
+setattr(revert_rate_avg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx' : 2,
                                                        'weight_idx' : 1})
