@@ -55,14 +55,14 @@ class RevertRate(um.UserMetric):
 
     # Structure that defines parameters for RevertRate class
     _param_types = {
-        'init' : {
+        'init': {
             'look_ahead': [int, 'Number of revisions to look '
                                 'ahead when computing revert.', 15],
             'look_back': [int, 'Number of revisions to look '
                                'back when computing revert.', 15],
             't': [int, 'Length of measurement period.', 168],
         },
-        'process' : {}
+        'process': {}
     }
 
     # Define the metrics data model meta
@@ -70,24 +70,22 @@ class RevertRate(um.UserMetric):
         'id_fields': [0],
         'date_fields': [],
         'float_fields': [],
-        'integer_fields': [2,3],
+        'integer_fields': [2, 3],
         'boolean_fields': [1],
-        }
+    }
 
     _agg_indices = {
-        'list_sum_indices' : _data_model_meta['integer_fields'] +
-                             _data_model_meta['float_fields'],
-        }
+        'list_sum_indices': _data_model_meta['integer_fields'] +
+        _data_model_meta['float_fields'],
+    }
 
     @um.pre_metrics_init
     def __init__(self, **kwargs):
         super(RevertRate, self).__init__(**kwargs)
 
     @staticmethod
-    def header(): return ['user_id', 
-                          'is_reverted',
-                          'revert_count',
-                          'revision_count']
+    def header():
+        return ['user_id', 'is_reverted', 'revert_count', 'revision_count']
 
     @um.UserMetric.pre_process_metric_call
     def process(self, user_handle, **kwargs):
@@ -114,7 +112,7 @@ def __revert(rev_id, page_id, sha1, user_text, metric_args):
     for rev in __future(rev_id, page_id, metric_args.look_ahead,
                         metric_args.project, metric_args.namespace):
         if rev[RevertRate.REV_SHA1_IDX] in history and \
-           rev[RevertRate.REV_SHA1_IDX] != sha1:
+                rev[RevertRate.REV_SHA1_IDX] != sha1:
             if user_text == rev[RevertRate.REV_USER_TEXT_IDX]:
                 return None
             else:
@@ -125,8 +123,8 @@ def __history(rev_id, page_id, n, project, namespace):
     """ Produce the n revisions on a page before a given revision
             Returns a generator of revision objects """
     try:
-        history =  query_mod.page_rev_hist_query(rev_id, page_id, n, project,
-                                                 namespace, look_ahead=False)
+        history = query_mod.page_rev_hist_query(rev_id, page_id, n, project,
+                                                namespace, look_ahead=False)
     except query_mod.UMQueryCallError as e:
         logging.error(__name__ + ' :: Failed to '
                                  'get revision history: {0}'.format(e.message))
@@ -139,7 +137,7 @@ def __future(rev_id, page_id, n, project, namespace):
             Returns a generator of revision objects """
     try:
         future = query_mod.page_rev_hist_query(rev_id, page_id, n, project,
-                                                namespace, look_ahead=True)
+                                               namespace, look_ahead=True)
     except query_mod.UMQueryCallError as e:
         logging.error(__name__ + ' :: Failed to '
                                  'get revision future: {0}'.format(e.message))
@@ -158,8 +156,8 @@ def _process_help(args):
 
     if thread_args.log_:
         logging.info(__name__ +
-                    ' :: Computing reverts on %s users (PID %s)'
-                    % (len(users), str(os.getpid())))
+                     ' :: Computing reverts on %s users (PID %s)'
+                     % (len(users), str(os.getpid())))
     results_agg = list()
     dropped_users = 0
 
@@ -174,10 +172,11 @@ def _process_help(args):
         # 1. Obtain user registration date
         # 2. Compute end date based on 't'
         # 3. Get user revisions in time period
-        query_args = namedtuple('QueryArgs', 'date_start date_end namespace')\
-            (format_mediawiki_timestamp(user_data.start),
-             format_mediawiki_timestamp(user_data.end),
-             thread_args.namespace)
+        query_args = namedtuple(
+            'QueryArgs', 'date_start date_end namespace')(
+                format_mediawiki_timestamp(user_data.start),
+                format_mediawiki_timestamp(user_data.end),
+                thread_args.namespace)
 
         try:
             revisions = query_mod.\
@@ -204,7 +203,7 @@ def _process_help(args):
 
     if thread_args.log_:
         logging.debug(__name__ + ' :: PID {0} complete. Dropped users = {1}'.
-            format(str(os.getpid()), dropped_users))
+                      format(str(os.getpid()), dropped_users))
 
     return results_agg
 
@@ -232,13 +231,12 @@ def _revision_proc(args):
 
 # Build "weighted rate" decorator
 revert_rate_avg = weighted_rate
-revert_rate_avg = decorator_builder(RevertRate.header())(
-                                    revert_rate_avg)
+revert_rate_avg = decorator_builder(RevertRate.header())(revert_rate_avg)
 
 setattr(revert_rate_avg, um.METRIC_AGG_METHOD_FLAG, True)
 setattr(revert_rate_avg, um.METRIC_AGG_METHOD_NAME, 'revert_rate_avg')
 setattr(revert_rate_avg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
                                                      'total_revisions',
-                                                     'average_rate',])
-setattr(revert_rate_avg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx' : 2,
-                                                       'weight_idx' : 1})
+                                                     'average_rate', ])
+setattr(revert_rate_avg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 2,
+                                                       'weight_idx': 1})
