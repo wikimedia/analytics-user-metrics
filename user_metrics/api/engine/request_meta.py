@@ -307,7 +307,8 @@ class ParameterMapping(object):
 # ########################################################
 
 from user_metrics.metrics.threshold import Threshold, threshold_editors_agg
-from user_metrics.metrics.blocks import Blocks, block_rate_agg
+from user_metrics.metrics.blocks import Blocks, block_rate_agg, \
+    block_prop_agg
 from user_metrics.metrics.bytes_added import BytesAdded, ba_median_agg, \
     ba_min_agg, ba_max_agg, ba_sum_agg, ba_mean_agg, ba_std_agg
 from user_metrics.metrics.survival import Survival, survival_editors_agg
@@ -356,7 +357,8 @@ aggregator_dict =\
     'min+bytes_added': ba_min_agg,
     'max+bytes_added': ba_max_agg,
     'dist+edit_rate': er_stats_agg,
-    'proportion+blocks': block_rate_agg,
+    'average+blocks': block_rate_agg,
+    'proportion+blocks': block_prop_agg,
     'dist+time_to_threshold': ttt_stats_agg,
     'dist+pages_created': pages_created_stats_agg,
     }

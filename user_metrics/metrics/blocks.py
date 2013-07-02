@@ -8,7 +8,8 @@ from user_metrics.config import logging
 from collections import namedtuple
 import user_metric as um
 from user_metrics.metrics import query_mod
-from user_metrics.etl.aggregator import weighted_rate, decorator_builder
+from user_metrics.etl.aggregator import weighted_rate, decorator_builder,\
+    boolean_rate
 
 
 class Blocks(um.UserMetric):
@@ -151,6 +152,18 @@ setattr(block_rate_agg, um.METRIC_AGG_METHOD_KWARGS, {
     'val_idx': 2,
 })
 
+# Build "proportion" decorator
+block_prop_agg = boolean_rate
+block_prop_agg = decorator_builder(Blocks.header())(block_prop_agg)
+
+setattr(block_prop_agg, um.METRIC_AGG_METHOD_FLAG, True)
+setattr(block_prop_agg, um.METRIC_AGG_METHOD_NAME, 'b_prop_agg')
+setattr(block_prop_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+                                                    'total_blocks',
+                                                    'proportion'])
+setattr(block_prop_agg, um.METRIC_AGG_METHOD_KWARGS, {
+    'val_idx': 1,
+})
 
 if __name__ == "__main__":
     for r in Blocks().process(['11174885', '15132776']):
