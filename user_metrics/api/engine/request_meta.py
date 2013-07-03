@@ -312,7 +312,8 @@ from user_metrics.metrics.blocks import Blocks, block_rate_agg, \
 from user_metrics.metrics.bytes_added import BytesAdded, ba_median_agg, \
     ba_min_agg, ba_max_agg, ba_sum_agg, ba_mean_agg, ba_std_agg
 from user_metrics.metrics.survival import Survival, survival_editors_agg
-from user_metrics.metrics.revert_rate import RevertRate, revert_rate_avg
+from user_metrics.metrics.revert_rate import RevertRate, revert_stats_agg, \
+    revert_prop_agg
 from user_metrics.metrics.time_to_threshold import TimeToThreshold, \
     ttt_avg_agg, ttt_stats_agg
 from user_metrics.metrics.edit_rate import EditRate, edit_rate_agg, \
@@ -350,7 +351,8 @@ aggregator_dict =\
     'proportion+threshold': threshold_editors_agg,
     'proportion+survival': survival_editors_agg,
     'proportion+live_account': live_accounts_agg,
-    'mean+revert_rate': revert_rate_avg,
+    'stats+revert_rate': revert_stats_agg,
+    'proportion+revert_rate': revert_prop_agg,
     'mean+edit_rate': edit_rate_agg,
     'mean+time_to_threshold': ttt_avg_agg,
     'median+bytes_added': ba_median_agg,

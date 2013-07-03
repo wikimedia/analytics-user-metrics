@@ -10,7 +10,9 @@ from collections import namedtuple
 import user_metric as um
 import os
 import user_metrics.utils.multiprocessing_wrapper as mpw
-from user_metrics.etl.aggregator import decorator_builder, weighted_rate
+from user_metrics.etl.aggregator import decorator_builder, boolean_rate, \
+    build_numpy_op_agg, build_agg_meta
+from numpy import mean
 from user_metrics.metrics import query_mod
 from user_metrics.metrics.users import UMP_MAP
 from user_metrics.utils import format_mediawiki_timestamp
@@ -97,7 +99,6 @@ class RevertRate(um.UserMetric):
         args = self._pack_params()
         self._results = mpw.build_thread_pool(user_handle, _process_help,
                                               self.k_, args)
-
         return self
 
 
@@ -229,14 +230,32 @@ def _revision_proc(args):
 # DEFINE METRIC AGGREGATORS
 # ==========================
 
-# Build "weighted rate" decorator
-revert_rate_avg = weighted_rate
-revert_rate_avg = decorator_builder(RevertRate.header())(revert_rate_avg)
+metric_header = RevertRate.header()
 
-setattr(revert_rate_avg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(revert_rate_avg, um.METRIC_AGG_METHOD_NAME, 'revert_rate_avg')
-setattr(revert_rate_avg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
-                                                     'total_revisions',
-                                                     'average_rate', ])
-setattr(revert_rate_avg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 2,
-                                                       'weight_idx': 1})
+field_prefixes = \
+    {
+        'reverted_': 1,
+        'reverts_': 2,
+        'revisions_': 3,
+    }
+
+# Build "stats" aggregator
+op_list = [sum, mean]
+revert_stats_agg = build_numpy_op_agg(build_agg_meta(op_list, field_prefixes),
+                                      metric_header,
+                                      'revert_stats_agg')
+
+agg_kwargs = getattr(revert_stats_agg, METRIC_AGG_METHOD_KWARGS)
+setattr(revert_stats_agg, METRIC_AGG_METHOD_KWARGS, agg_kwargs)
+
+# Build proportion aggregator
+revert_prop_agg = boolean_rate
+revert_prop_agg = decorator_builder(RevertRate.header())(
+    revert_prop_agg)
+
+setattr(revert_prop_agg, um.METRIC_AGG_METHOD_FLAG, True)
+setattr(revert_prop_agg, um.METRIC_AGG_METHOD_NAME, 'revert_prop_agg')
+setattr(revert_prop_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+                                                     'total_reverted',
+                                                     'rate', ])
+setattr(revert_prop_agg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
