@@ -16,6 +16,7 @@ from numpy import mean
 from user_metrics.metrics import query_mod
 from user_metrics.metrics.users import UMP_MAP
 from user_metrics.utils import format_mediawiki_timestamp
+from user_metrics.metrics.user_metric import METRIC_AGG_METHOD_KWARGS
 
 
 class RevertRate(um.UserMetric):
