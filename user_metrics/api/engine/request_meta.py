@@ -61,6 +61,7 @@ REQUEST_VALUE_MAPPING = {
     }
 }
 
+
 def RequestMetaFactory(cohort_expr, cohort_gen_timestamp, metric_expr):
     """
         Dynamically builds a record type given a metric handle
@@ -86,9 +87,8 @@ def RequestMetaFactory(cohort_expr, cohort_gen_timestamp, metric_expr):
     additional_params = additional_params[:-1]
     params = default_params + additional_params
 
-    arg_list = ['cohort_expr', 'cohort_gen_timestamp', 'metric_expr'] +\
-               ['None'] * \
-               len(ParameterMapping.QUERY_PARAMS_BY_METRIC[metric_expr])
+    arg_list = ['cohort_expr', 'cohort_gen_timestamp', 'metric_expr'] + \
+        ['None'] * len(ParameterMapping.QUERY_PARAMS_BY_METRIC[metric_expr])
     arg_str = "(" + ",".join(arg_list) + ")"
 
     rt = recordtype("RequestMeta", params)
@@ -137,7 +137,8 @@ def format_request_params(request_meta):
     if not request_meta.project:
         request_meta.project = DEFAULT_PROJECT
 
-    if get_request_type(request_meta) != request_types.raw and not request_meta.group in REQUEST_VALUE_MAPPING:
+    grp_in_req = request_meta.group in REQUEST_VALUE_MAPPING
+    if get_request_type(request_meta) != request_types.raw and not grp_in_req:
         request_meta.group = DEFAULT_GROUP
 
     # set the aggregator if there is one
@@ -233,9 +234,9 @@ def rebuild_unpacked_request(unpacked_req):
 
 class ParameterMapping(object):
     """
-        Using the **Mediator** model :: Defines the query parameters accepted by
-        each metric request.  This is a dict keyed on metric that stores a list
-        of tuples.  Each tuple defines:
+        Using the **Mediator** model :: Defines the query parameters accepted
+        by each metric request.  This is a dict keyed on metric that stores a
+        list of tuples.  Each tuple defines:
 
            (<name of allowable query string var>, <name of corresponding
            metric param>)
@@ -326,8 +327,7 @@ from user_metrics.metrics.pages_created import PagesCreated, \
 
 
 # Registered metrics types
-metric_dict =\
-    {
+metric_dict = {
     'threshold': Threshold,
     'survival': Survival,
     'revert_rate': RevertRate,
@@ -338,12 +338,11 @@ metric_dict =\
     'namespace_edits': NamespaceEdits,
     'live_account': LiveAccount,
     'pages_created': PagesCreated,
-    }
+}
 
 # @TODO: let metric types handle this mapping themselves and obsolete this
 #            structure
-aggregator_dict =\
-    {
+aggregator_dict = {
     'sum+bytes_added': ba_sum_agg,
     'mean+bytes_added': ba_mean_agg,
     'std+bytes_added': ba_std_agg,
@@ -363,7 +362,7 @@ aggregator_dict =\
     'proportion+blocks': block_prop_agg,
     'dist+time_to_threshold': ttt_stats_agg,
     'dist+pages_created': pages_created_stats_agg,
-    }
+}
 
 
 def get_metric_type(metric):
@@ -409,19 +408,20 @@ def get_agg_key(agg_handle, metric_handle):
 
 # Enumeration to store request types
 request_types = enum(time_series='time_series',
-    aggregator='aggregator',
-    raw='raw')
+                     aggregator='aggregator',
+                     raw='raw')
 
 
 def get_request_type(request_meta):
     """ Determines request type. """
-    if request_meta.aggregator and request_meta.time_series \
-       and request_meta.group and request_meta.slice and request_meta.start \
-       and request_meta.end:
+
+    cond = request_meta.aggregator and request_meta.time_series
+    cond = cond and request_meta.group
+    cond = cond and request_meta.slice and request_meta.start
+    cond = cond and request_meta.end
+    if cond:
         return request_types.time_series
     elif request_meta.aggregator:
         return request_types.aggregator
     else:
         return request_types.raw
-
-
