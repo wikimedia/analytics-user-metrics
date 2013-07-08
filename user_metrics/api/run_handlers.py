@@ -15,6 +15,12 @@ metrics API.  This piece consists of three components:
         Handles sending notifications on job status.
 """
 
+__author__ = {
+    "ryan faulkner": "rfaulkner@wikimedia.org"
+}
+__date__ = "2013-07-05"
+__license__ = "GPL (version 2 or later)"
+
 from user_metrics.api.engine.response_handler import process_responses
 from user_metrics.api.engine.request_manager import api_request_queue, \
     req_notification_queue_out, req_notification_queue_in, api_response_queue
