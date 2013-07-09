@@ -103,6 +103,15 @@ class FileBroker(Broker):
             for line in lines:
                 f.write(line)
 
-
     def get(self, target, key):
-        pass
+        """
+        Retrieve a value with the given key
+        """
+        with open(target, 'r') as f:
+            lines = f.read().split('\n')
+            for idx, line in enumerate(lines):
+                item = json.loads(line)
+                if item.keys()[0] == key:
+                    return item[key]
+        return None
+
