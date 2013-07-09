@@ -11,17 +11,17 @@ __license__ = "GPL (version 2 or later)"
 
 class Broker:
 
-    def __init__():
+    def __init__(self):
         pass
 
-    def compose():
+    def compose(self):
         pass
 
-    def add(target, key, value):
+    def add(self, target, key, value):
         pass
 
-    def remove(target, key):
+    def remove(self, target, key):
         pass
 
-    def get(target, key):
+    def get(self, target, key):
         pass
