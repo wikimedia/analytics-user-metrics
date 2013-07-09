@@ -68,7 +68,19 @@ class FileBroker(Broker):
             f.write(json.dumps({key: value}) + '\n')
 
     def remove(self, target, key):
-        pass
+        """
+        Remove element with the given key
+        """
+        with open(target, 'r') as f:
+            lines = f.read().split('\n')
+            for idx, line in enumerate(lines):
+                item = json.loads(line)
+                if item['key'] == key:
+                    del lines[idx]
+                    break
+        with open(target, 'w') as f:
+            for line in lines:
+                f.write(line)
 
     def get(self, target, key):
         pass
