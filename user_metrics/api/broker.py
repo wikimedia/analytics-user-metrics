@@ -9,19 +9,23 @@ __author__ = {
 __date__ = "2013-07-06"
 __license__ = "GPL (version 2 or later)"
 
-class Broker:
 
-    def __init__(self):
-        pass
+class Broker(object):
+    """
+    Base class for broker
+    """
+
+    def __init__(self, **kwargs):
+        raise NotImplementedError()
 
     def compose(self):
-        pass
+        raise NotImplementedError()
 
     def add(self, target, key, value):
-        pass
+        raise NotImplementedError()
 
     def remove(self, target, key):
-        pass
+        raise NotImplementedError()
 
     def get(self, target, key):
-        pass
+        raise NotImplementedError()
