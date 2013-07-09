@@ -37,6 +37,12 @@ class Broker(object):
         """
         raise NotImplementedError()
 
+    def update(self, target, key, value):
+        """
+        Remove a key/value pair to the broker
+        """
+        raise NotImplementedError()
+
     def get(self, target, key):
         """
         Retrieve a key/value pair to the broker
@@ -75,12 +81,28 @@ class FileBroker(Broker):
             lines = f.read().split('\n')
             for idx, line in enumerate(lines):
                 item = json.loads(line)
-                if item['key'] == key:
+                if item.keys()[0] == key:
                     del lines[idx]
                     break
         with open(target, 'w') as f:
             for line in lines:
                 f.write(line)
+
+    def update(self, target, key, value):
+        """
+        Update element with the given key
+        """
+        with open(target, 'r') as f:
+            lines = f.read().split('\n')
+            for idx, line in enumerate(lines):
+                item = json.loads(line)
+                if item.keys()[0] == key:
+                    lines[idx] = json.dumps({key: value}) + '\n'
+                    break
+        with open(target, 'w') as f:
+            for line in lines:
+                f.write(line)
+
 
     def get(self, target, key):
         pass
