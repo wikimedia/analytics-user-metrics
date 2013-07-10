@@ -16,33 +16,29 @@ __author__ = {
 __date__ = "2012-12-21"
 __license__ = "GPL (version 2 or later)"
 
-import os
-
 from flask import Flask, render_template, Markup, redirect, url_for, \
     request, escape, flash, jsonify, make_response
 
 from user_metrics.etl.data_loader import Connector
 from user_metrics.config import logging, settings
-from user_metrics.utils import unpack_fields
 from user_metrics.api.engine.data import get_cohort_refresh_datetime, \
-    get_data, get_url_from_keys, build_key_signature, read_pickle_data, get_users
+    get_data, get_url_from_keys, build_key_signature, read_pickle_data
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
-    REQ_NCB_LOCK
+    REQ_NCB_LOCK, BROKER_TARGET, umapi_broker_context
 from user_metrics.api.engine.request_meta import filter_request_input, \
     format_request_params, RequestMetaFactory, \
     get_metric_names
-from user_metrics.api.engine.request_manager import api_request_queue, \
-    req_cb_get_cache_keys, req_cb_get_url, req_cb_get_is_running
+from user_metrics.api.engine.request_manager import req_cb_get_cache_keys, \
+    req_cb_get_url, req_cb_get_is_running
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.api.session import APIUser
 import user_metrics.config.settings as conf
-
+from hashlib import sha1
 
 # upload files
-from werkzeug import secure_filename
 import csv
 import json
-from itertools import groupby
+
 UPLOAD_FOLDER = 'csv_uploads'
 ALLOWED_EXTENSIONS = set(['csv'])
 
@@ -457,7 +453,8 @@ def output(cohort, metric):
 
     # Add the request to the queue
     else:
-        api_request_queue.put(unpack_fields(rm), block=True)
+        hash = sha1(request.url.encode('utf-8')).hexdigest()
+        umapi_broker_context.add(BROKER_TARGET, hash, request.url)
 
     return render_template('processing.html', url_str=str(rm))
 
