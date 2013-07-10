@@ -42,9 +42,6 @@ __author__ = {
 __date__ = "2012-12-21"
 __license__ = "GPL (version 2 or later)"
 
-
-import multiprocessing as mp
-
 from user_metrics.config import logging, settings
 from user_metrics.api.views import app
 
@@ -66,7 +63,8 @@ if not app.debug:
 
     mail_handler = SMTPHandler('127.0.0.1',
                                'no-reply@user-metrics.wikimedia.org',
-                               ADMINS, 'UserMetrics API encountered serious error')
+                               ADMINS, 'UserMetrics API encountered '
+                                       'serious error')
     mail_handler.setLevel(logging.ERROR)
     mail_handler.setFormatter(Formatter('''
     Message type:       %(levelname)s
