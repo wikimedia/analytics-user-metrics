@@ -35,12 +35,12 @@ response_controller_proc = None
 rm_callback_proc = None
 
 
-def setup_controller(req_queue, res_queue, msg_queue_in, msg_queue_out):
+def setup_controller(res_queue, msg_queue_in, msg_queue_out):
     """
         Sets up the process that handles API jobs
     """
     job_controller_proc = mp.Process(target=job_control,
-                                     args=(req_queue, res_queue))
+                                     args=res_queue)
     response_controller_proc = mp.Process(target=process_responses,
                                           args=(res_queue,
                                                 msg_queue_in))
@@ -67,7 +67,6 @@ def teardown():
 
 
 if __name__ == '__main__':
-    setup_controller(api_request_queue,
-        api_response_queue,
+    setup_controller(api_response_queue,
         req_notification_queue_in,
         req_notification_queue_out)
