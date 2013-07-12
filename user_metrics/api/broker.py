@@ -12,6 +12,7 @@ __license__ = "GPL (version 2 or later)"
 
 import json
 import os
+from user_metrics.config import logging
 
 
 class Broker(object):
@@ -46,6 +47,12 @@ class Broker(object):
     def get(self, target, key):
         """
         Retrieve a key/value pair to the broker
+        """
+        raise NotImplementedError()
+
+    def pop(self, target):
+        """
+        Pop the first item off of the queue
         """
         raise NotImplementedError()
 
@@ -115,3 +122,20 @@ class FileBroker(Broker):
                     return item[key]
         return None
 
+    def pop(self, target):
+        """
+        Pop the top value from the list
+        """
+        with open(target, 'r') as f:
+            lines = f.read().split('\n')
+            if not len(lines):
+                try:
+                    item = json.loads(lines[0])
+                    key = item.keys()[0]
+                except (KeyError, ValueError):
+                    logging.error(__name__ + ' :: FileBroker.pop - '
+                                             'Could not parse key.')
+                    return None
+                self.remove(target, key)
+                return item[key]
+        return None
