@@ -10,7 +10,7 @@ from user_metrics.config import settings
 from multiprocessing import Lock
 from user_metrics.api.broker import FileBroker
 
-BROKER_TARGET = 'broker.txt'
+REQUEST_BROKER_TARGET = 'broker.txt'
 umapi_broker_context = FileBroker()
 query_mod = nested_import(settings.__query_module__)
 

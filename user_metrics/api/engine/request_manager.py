@@ -83,7 +83,7 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.config import logging, settings
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
-    REQ_NCB_LOCK, REQUEST_PATH, BROKER_TARGET, umapi_broker_context
+    REQ_NCB_LOCK, REQUEST_PATH, REQUEST_BROKER_TARGET, umapi_broker_context
 from user_metrics.api.engine.data import get_users, get_url_from_keys, \
     build_key_signature
 from user_metrics.api.engine.request_meta import rebuild_unpacked_request
@@ -151,7 +151,7 @@ def job_control(response_queue):
         # Request Queue Processing
         # ------------------------
 
-        req_item = umapi_broker_context.pop(BROKER_TARGET)
+        req_item = umapi_broker_context.pop(REQUEST_BROKER_TARGET)
 
         logging.debug(log_name + ' :: PULLING item from request queue -> ' \
                                  '\n\tCOHORT = {0} - METRIC = {1}'
