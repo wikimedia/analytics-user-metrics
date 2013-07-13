@@ -24,7 +24,7 @@ from user_metrics.config import logging, settings
 from user_metrics.api.engine.data import get_cohort_refresh_datetime, \
     get_data, get_url_from_keys, build_key_signature, read_pickle_data
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
-    REQ_NCB_LOCK, BROKER_TARGET, umapi_broker_context
+    REQ_NCB_LOCK, REQUEST_BROKER_TARGET, umapi_broker_context
 from user_metrics.api.engine.request_meta import filter_request_input, \
     format_request_params, RequestMetaFactory, \
     get_metric_names
@@ -454,7 +454,7 @@ def output(cohort, metric):
     # Add the request to the queue
     else:
         hash = sha1(request.url.encode('utf-8')).hexdigest()
-        umapi_broker_context.add(BROKER_TARGET, hash, request.url)
+        umapi_broker_context.add(REQUEST_BROKER_TARGET, hash, request.url)
 
     return render_template('processing.html', url_str=str(rm))
 
