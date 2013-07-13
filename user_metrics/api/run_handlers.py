@@ -22,7 +22,7 @@ __date__ = "2013-07-05"
 __license__ = "GPL (version 2 or later)"
 
 import multiprocessing as mp
-from user_metrics.api.engine.request_manager import api_request_queue,\
+from user_metrics.api.engine.request_manager import \
     req_notification_queue_out, req_notification_queue_in, api_response_queue
 from user_metrics.api.engine.response_handler import process_responses
 from user_metrics.api.engine.request_manager import job_control, \
