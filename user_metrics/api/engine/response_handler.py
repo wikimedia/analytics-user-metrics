@@ -8,12 +8,10 @@ __author__ = {
 __date__ = "2013-03-14"
 __license__ = "GPL (version 2 or later)"
 
-from collections import OrderedDict
 from user_metrics.config import logging
 from user_metrics.api import REQ_NCB_LOCK
 from user_metrics.api.engine.request_meta import rebuild_unpacked_request
 from user_metrics.api.engine.data import set_data, build_key_signature
-from user_metrics.api.engine.request_manager import req_cb_flag_job_complete
 from Queue import Empty
 from flask import escape
 
@@ -73,8 +71,7 @@ def process_responses(response_queue, msg_in):
 
         key_sig = build_key_signature(request_meta, hash_result=True)
 
-        # Set request in list to "not alive"
-        req_cb_flag_job_complete(key_sig, REQ_NCB_LOCK)
+        # Add result to cache once completed
 
         logging.debug(log_name + ' - Setting data for {0}'.format(
             str(request_meta)))
