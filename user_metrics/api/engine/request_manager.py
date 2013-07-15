@@ -94,6 +94,7 @@ from multiprocessing import Process, Queue
 from collections import namedtuple
 from os import getpid
 from sys import getsizeof
+import time
 
 
 # API JOB HANDLER
@@ -107,7 +108,7 @@ from sys import getsizeof
 MAX_BLOCK_SIZE = 5000
 MAX_CONCURRENT_JOBS = 1
 QUEUE_WAIT = 5
-
+RESQUEST_TIMEOUT = 1.0
 
 # Defines the job item type used to temporarily store job progress
 job_item_type = namedtuple('JobItem', 'id process request queue')
@@ -141,10 +142,15 @@ def job_control():
 
     while 1:
 
+        time.sleep(RESQUEST_TIMEOUT)
+
         # Request Queue Processing
         # ------------------------
 
+        logging.debug(log_name  + ' - POLLING REQUESTS...')
         req_item = umapi_broker_context.pop(REQUEST_BROKER_TARGET)
+        if not req_item:
+            continue
 
         logging.debug(log_name + ' :: PULLING item from request queue -> ' \
                                  '\n\tCOHORT = {0} - METRIC = {1}'
