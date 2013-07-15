@@ -153,8 +153,8 @@ def job_control():
             continue
 
         logging.debug(log_name + ' :: PULLING item from request queue -> ' \
-                                 '\n\tCOHORT = {0} - METRIC = {1}'
-            .format(req_item['cohort_expr'], req_item['metric']))
+                                 '\n\t{0}'
+            .format(req_item))
 
         # Process complete jobs
         # ---------------------
