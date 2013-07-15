@@ -142,17 +142,19 @@ class FileBroker(Broker):
         """
         try:
             with open(target, 'r') as f:
-                lines = f.read().split('\n')
-                if not len(lines):
-                    try:
-                        item = json.loads(lines[0])
-                        key = item.keys()[0]
-                    except (KeyError, ValueError):
-                        logging.error(__name__ + ' :: FileBroker.pop - '
-                                                 'Could not parse key.')
-                        return None
-                    self.remove(target, key)
-                    return item[key]
+                contents = f.read()
+                if contents:
+                    lines = contents.split('\n')
+                    if len(lines):
+                        try:
+                            item = json.loads(lines[0])
+                            key = item.keys()[0]
+                        except (KeyError, ValueError):
+                            logging.error(__name__ + ' :: FileBroker.pop - '
+                                                     'Could not parse key.')
+                            return None
+                        self.remove(target, key)
+                        return item[key]
         except IOError:
             with open(target, 'w'):
                 pass
