@@ -22,11 +22,8 @@ __date__ = "2013-07-05"
 __license__ = "GPL (version 2 or later)"
 
 import multiprocessing as mp
-from user_metrics.api.engine.request_manager import \
-    req_notification_queue_out, req_notification_queue_in
 from user_metrics.api.engine.response_handler import process_responses
-from user_metrics.api.engine.request_manager import job_control, \
-    requests_notification_callback
+from user_metrics.api.engine.request_manager import job_control
 from user_metrics.utils import terminate_process_with_checks
 from user_metrics.config import logging
 
@@ -35,19 +32,15 @@ response_controller_proc = None
 rm_callback_proc = None
 
 
-def setup_controller(msg_queue_in, msg_queue_out):
+def setup_controller(msg_queue_in):
     """
         Sets up the process that handles API jobs
     """
     job_controller_proc = mp.Process(target=job_control)
     response_controller_proc = mp.Process(target=process_responses,
                                           args=msg_queue_in)
-    rm_callback_proc = mp.Process(target=requests_notification_callback,
-                                  args=(msg_queue_in,
-                                        msg_queue_out))
     job_controller_proc.start()
     response_controller_proc.start()
-    rm_callback_proc.start()
 
 
 def teardown():
@@ -58,12 +51,9 @@ def teardown():
     try:
         terminate_process_with_checks(job_controller_proc)
         terminate_process_with_checks(response_controller_proc)
-        terminate_process_with_checks(rm_callback_proc)
-
     except Exception:
         logging.error(__name__ + ' :: Could not shut down callbacks.')
 
 
 if __name__ == '__main__':
-    setup_controller(req_notification_queue_in,
-        req_notification_queue_out)
+    setup_controller()
