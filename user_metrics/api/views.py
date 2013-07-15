@@ -24,12 +24,10 @@ from user_metrics.config import logging, settings
 from user_metrics.api.engine.data import get_cohort_refresh_datetime, \
     get_data, get_url_from_keys, build_key_signature, read_pickle_data
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
-    REQ_NCB_LOCK, REQUEST_BROKER_TARGET, umapi_broker_context
+    REQUEST_BROKER_TARGET, umapi_broker_context
 from user_metrics.api.engine.request_meta import filter_request_input, \
     format_request_params, RequestMetaFactory, \
     get_metric_names
-from user_metrics.api.engine.request_manager import req_cb_get_cache_keys, \
-    req_cb_get_url, req_cb_get_is_running
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.api.session import APIUser
 import user_metrics.config.settings as conf
@@ -439,7 +437,8 @@ def output(cohort, metric):
     key_sig = build_key_signature(rm, hash_result=True)
 
     # Is the request already running?
-    is_running = req_cb_get_is_running(key_sig, REQ_NCB_LOCK)
+    # TODO check req_target
+    is_running = False
 
     # Determine if request is already hashed
     if data and not refresh:
@@ -468,11 +467,13 @@ def job_queue():
     p_list.append(Markup('<thead><tr><th>is_alive</th><th>url'
                          '</th></tr></thead>\n<tbody>\n'))
 
-    keys = req_cb_get_cache_keys(REQ_NCB_LOCK)
+    # Get keys from broker target
+    keys = []
     for key in keys:
         # Log the status of the job
-        url = req_cb_get_url(key, REQ_NCB_LOCK)
-        is_alive = str(req_cb_get_is_running(key, REQ_NCB_LOCK))
+        #   TODO this will be part of the broker data
+        url = ''
+        is_alive = False
 
         p_list.append('<tr><td>')
         response_url = "".join(['<a href="',
