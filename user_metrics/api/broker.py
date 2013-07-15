@@ -81,13 +81,19 @@ class FileBroker(Broker):
         """
         Remove element with the given key
         """
-        with open(target, 'r') as f:
-            lines = f.read().split('\n')
-            for idx, line in enumerate(lines):
-                item = json.loads(line)
-                if item.keys()[0] == key:
-                    del lines[idx]
-                    break
+        try:
+            with open(target, 'r') as f:
+                lines = f.read().split('\n')
+                for idx, line in enumerate(lines):
+                    item = json.loads(line)
+                    if item.keys()[0] == key:
+                        del lines[idx]
+                        break
+        except IOError:
+            lines = []
+            with open(target, 'w'):
+                pass
+
         with open(target, 'w') as f:
             for line in lines:
                 f.write(line)
@@ -96,13 +102,19 @@ class FileBroker(Broker):
         """
         Update element with the given key
         """
-        with open(target, 'r') as f:
-            lines = f.read().split('\n')
-            for idx, line in enumerate(lines):
-                item = json.loads(line)
-                if item.keys()[0] == key:
-                    lines[idx] = json.dumps({key: value}) + '\n'
-                    break
+        try:
+            with open(target, 'r') as f:
+                lines = f.read().split('\n')
+                for idx, line in enumerate(lines):
+                    item = json.loads(line)
+                    if item.keys()[0] == key:
+                        lines[idx] = json.dumps({key: value}) + '\n'
+                        break
+        except IOError:
+            lines = []
+            with open(target, 'w'):
+                pass
+
         with open(target, 'w') as f:
             for line in lines:
                 f.write(line)
@@ -111,28 +123,37 @@ class FileBroker(Broker):
         """
         Retrieve a value with the given key
         """
-        with open(target, 'r') as f:
-            lines = f.read().split('\n')
-            for idx, line in enumerate(lines):
-                item = json.loads(line)
-                if item.keys()[0] == key:
-                    return item[key]
-        return None
+        try:
+            with open(target, 'r') as f:
+                lines = f.read().split('\n')
+                for idx, line in enumerate(lines):
+                    item = json.loads(line)
+                    if item.keys()[0] == key:
+                        return item[key]
+        except IOError:
+            with open(target, 'w'):
+                pass
+
+            return None
 
     def pop(self, target):
         """
         Pop the top value from the list
         """
-        with open(target, 'r') as f:
-            lines = f.read().split('\n')
-            if not len(lines):
-                try:
-                    item = json.loads(lines[0])
-                    key = item.keys()[0]
-                except (KeyError, ValueError):
-                    logging.error(__name__ + ' :: FileBroker.pop - '
-                                             'Could not parse key.')
-                    return None
-                self.remove(target, key)
-                return item[key]
+        try:
+            with open(target, 'r') as f:
+                lines = f.read().split('\n')
+                if not len(lines):
+                    try:
+                        item = json.loads(lines[0])
+                        key = item.keys()[0]
+                    except (KeyError, ValueError):
+                        logging.error(__name__ + ' :: FileBroker.pop - '
+                                                 'Could not parse key.')
+                        return None
+                    self.remove(target, key)
+                    return item[key]
+        except IOError:
+            with open(target, 'w'):
+                pass
         return None
