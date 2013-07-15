@@ -20,9 +20,6 @@ class Broker(object):
     Base class for broker
     """
 
-    def __init__(self, **kwargs):
-        raise NotImplementedError()
-
     def compose(self):
         raise NotImplementedError()
 
