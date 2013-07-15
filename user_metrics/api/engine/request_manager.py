@@ -83,10 +83,9 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.config import logging, settings
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
-    REQ_NCB_LOCK, REQUEST_PATH, REQUEST_BROKER_TARGET, umapi_broker_context,\
+    REQUEST_BROKER_TARGET, umapi_broker_context,\
     RESPONSE_BROKER_TARGET
-from user_metrics.api.engine.data import get_users, get_url_from_keys, \
-    build_key_signature
+from user_metrics.api.engine.data import get_users
 from user_metrics.api.engine.request_meta import rebuild_unpacked_request
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.metrics.user_metric import UserMetricError
@@ -95,8 +94,6 @@ from multiprocessing import Process, Queue
 from collections import namedtuple
 from os import getpid
 from sys import getsizeof
-from Queue import Empty
-from time import sleep
 
 
 # API JOB HANDLER
