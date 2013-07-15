@@ -22,23 +22,21 @@ __date__ = "2013-07-05"
 __license__ = "GPL (version 2 or later)"
 
 import multiprocessing as mp
-from user_metrics.api.engine.response_handler import process_responses
+from user_metrics.api.engine.response_handler import process_response
 from user_metrics.api.engine.request_manager import job_control
 from user_metrics.utils import terminate_process_with_checks
 from user_metrics.config import logging
 
 job_controller_proc = None
 response_controller_proc = None
-rm_callback_proc = None
 
 
-def setup_controller(msg_queue_in):
+def setup_controller():
     """
         Sets up the process that handles API jobs
     """
     job_controller_proc = mp.Process(target=job_control)
-    response_controller_proc = mp.Process(target=process_responses,
-                                          args=msg_queue_in)
+    response_controller_proc = mp.Process(target=process_response)
     job_controller_proc.start()
     response_controller_proc.start()
 
