@@ -13,9 +13,11 @@ from user_metrics.config import logging
 from user_metrics.api.engine.request_meta import rebuild_unpacked_request
 from user_metrics.api.engine.data import set_data, build_key_signature
 
+import time
+
 # Timeout in seconds to wait for data on the queue.  This should be long
 # enough to ensure that the full response can be received
-RESPONSE_TIMEOUT = 0.1
+RESPONSE_TIMEOUT = 1.0
 
 
 # API RESPONSE HANDLER
@@ -30,8 +32,14 @@ def process_response():
 
     while 1:
 
+        time.sleep(RESPONSE_TIMEOUT)
+
         # Read request from the broker target
+        logging.debug(log_name  + ' - POLLING RESPONSES...')
         res_item = umapi_broker_context.pop(RESPONSE_BROKER_TARGET)
+        if not res_item:
+            continue
+
         request_meta = rebuild_unpacked_request(res_item)
         key_sig = build_key_signature(request_meta, hash_result=True)
 
@@ -41,5 +49,7 @@ def process_response():
         logging.debug(log_name + ' - Setting data for {0}'.format(
             str(request_meta)))
         set_data(stream, request_meta)
+
+
 
     logging.debug(log_name + ' - SHUTTING DOWN...')
