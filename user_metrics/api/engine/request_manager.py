@@ -128,7 +128,6 @@ def job_control():
 
     # Store executed and pending jobs respectively
     job_queue = list()
-    wait_queue = list()
 
     # Global job ID number
     job_id = 0
@@ -192,20 +191,6 @@ def job_control():
                                          'COHORT = {2} - METRIC = {3}'\
                     .format(str(job_id), concurrent_jobs,
                             wait_req.cohort_expr, wait_req.metric))
-
-
-        # Add newest job to the queue
-        # ---------------------------
-
-        if req_item:
-
-            # Build the request item
-            rm = rebuild_unpacked_request(req_item)
-
-            logging.debug(log_name + ' : REQUEST -> WAIT ' \
-                                     '\n\tCOHORT = {0} - METRIC = {1}'
-                .format(rm.cohort_expr, rm.metric))
-            wait_queue.append(rm)
 
     logging.debug('{0} - FINISHING.'.format(log_name))
 
