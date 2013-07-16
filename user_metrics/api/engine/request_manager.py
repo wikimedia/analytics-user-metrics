@@ -147,7 +147,11 @@ def job_control():
         # ------------------------
 
         logging.debug(log_name  + ' - POLLING REQUESTS...')
-        req_item = umapi_broker_context.pop(REQUEST_BROKER_TARGET)
+        if concurrent_jobs <= MAX_CONCURRENT_JOBS:
+            req_item = umapi_broker_context.pop(REQUEST_BROKER_TARGET)
+        else:
+            continue
+
         if not req_item:
             continue
 
@@ -167,30 +171,22 @@ def job_control():
                                      '\n\tConcurrent jobs = {1}'
             .format(str(job_item.id), concurrent_jobs))
 
-        # Process pending jobs
-        # --------------------
+        # Process request
+        # ---------------
 
-        for wait_req in wait_queue:
-            if concurrent_jobs <= MAX_CONCURRENT_JOBS:
-                # prepare job from item
+        req_q = Queue()
+        proc = Process(target=process_metrics, args=(req_q, req_item))
+        proc.start()
 
-                req_q = Queue()
-                proc = Process(target=process_metrics, args=(req_q, wait_req))
-                proc.start()
+        job_item = job_item_type(job_id, proc, req_item, req_q)
+        job_queue.append(job_item)
 
-                job_item = job_item_type(job_id, proc, wait_req, req_q)
-                job_queue.append(job_item)
+        concurrent_jobs += 1
+        job_id += 1
 
-                del wait_queue[wait_queue.index(wait_req)]
-
-                concurrent_jobs += 1
-                job_id += 1
-
-                logging.debug(log_name + ' :: WAIT -> RUN - Job ID {0}' \
-                                         '\n\tConcurrent jobs = {1}, ' \
-                                         'COHORT = {2} - METRIC = {3}'\
-                    .format(str(job_id), concurrent_jobs,
-                            wait_req.cohort_expr, wait_req.metric))
+        logging.debug(log_name + ' :: WAIT -> RUN - Job ID {0}' \
+                                 '\n\tConcurrent jobs = {1}, REQ = {2}'
+                      .format(str(job_id), concurrent_jobs, req_item))
 
     logging.debug('{0} - FINISHING.'.format(log_name))
 
