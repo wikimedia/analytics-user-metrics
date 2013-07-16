@@ -164,12 +164,21 @@ def job_control():
 
         for job_item in job_queue:
 
-            umapi_broker_context.add(RESPONSE_BROKER_TARGET, job_item.request)
-            del job_queue[job_queue.index(job_item)]
-            concurrent_jobs -= 1
-            logging.debug(log_name + ' :: RUN -> RESPONSE - Job ID {0}'\
-                                     '\n\tConcurrent jobs = {1}'
-            .format(str(job_item.id), concurrent_jobs))
+            if not job_item.queue.empty():
+
+                # Pull data off of the queue and add it to response queue
+                data = ''
+                while not job_item.queue.empty():
+                    data += job_item.queue.get(True)
+
+                # Put the response strinf
+                umapi_broker_context.add(RESPONSE_BROKER_TARGET, [job_item.request, data])
+
+                del job_queue[job_queue.index(job_item)]
+                concurrent_jobs -= 1
+                logging.debug(log_name + ' :: RUN -> RESPONSE - Job ID {0}'\
+                                         '\n\tConcurrent jobs = {1}'
+                .format(str(job_item.id), concurrent_jobs))
 
         # Process request
         # ---------------
