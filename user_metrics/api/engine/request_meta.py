@@ -62,6 +62,24 @@ REQUEST_VALUE_MAPPING = {
 }
 
 
+def parse_request(request):
+    """
+    Parses umapi requests
+    """
+    bits = request.split('/')[4:]
+    cohort = bits[0]
+    bits = bits[1].split('?')
+    metric = bits[0]
+
+    args = namedtuple('UM_REQUEST_ARGS', '')
+    if len(bits) > 1:
+        args_expr = [i.split('=') for i in bits[1].split('&')]
+        args = recordtype('UM_REQUEST_ARGS', ' '.join([i[0] for i in args_expr]))
+        for i in args_expr:
+            setattr(args, i[0], i[1])
+    return namedtuple('UM_REQUEST', 'cohort metric args')(cohort, metric, args)
+
+
 def RequestMetaFactory(cohort_expr, cohort_gen_timestamp, metric_expr):
     """
         Dynamically builds a record type given a metric handle
