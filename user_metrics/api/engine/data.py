@@ -13,7 +13,6 @@
 
         get_users(cohort_expr)
         get_cohort_id(utm_name)
-        get_cohort_refresh_datetime(utm_id)
 
     The other portion of data storage and retrieval is concerned with providing
     functionality that enables responses to be cached.  Request responses are
@@ -48,21 +47,17 @@ __date__ = "2012-01-11"
 __license__ = "GPL (version 2 or later)"
 
 
-from datetime import datetime
 from re import search
 from collections import OrderedDict
 from hashlib import sha1
 import cPickle
 import os
 
-import user_metrics.etl.data_loader as dl
-from user_metrics.config import logging
-from user_metrics.api.engine import COHORT_REGEX, parse_cohorts, \
-    DATETIME_STR_FORMAT
+from user_metrics.config import logging, settings
+from user_metrics.api.engine import COHORT_REGEX, parse_cohorts
 from user_metrics.api.engine.request_meta import REQUEST_META_QUERY_STR,\
-    REQUEST_META_BASE
+    REQUEST_META_BASE, build_request_obj
 from user_metrics.api import MetricsAPIError, query_mod
-from user_metrics.config import settings
 
 
 # This is used to separate key meta and key strings for hash table data
@@ -90,39 +85,13 @@ def get_users(cohort_expr):
     return users
 
 
-def get_cohort_refresh_datetime(utm_id):
-    """
-        Get the latest refresh datetime of a cohort.  Returns current time
-        formatted as a string if the field is not found.
-    """
-
-    # @TODO MOVE DB REFS INTO QUERY MODULE
-    conn = dl.Connector(instance=settings.__cohort_data_instance__)
-    query = """ SELECT utm_touched FROM usertags_meta WHERE utm_id = %s """
-    conn._cur_.execute(query, int(utm_id))
-
-    utm_touched = None
-    try:
-        utm_touched = conn._cur_.fetchone()[0]
-    except ValueError:
-        pass
-
-    # Ensure the field was retrieved
-    if not utm_touched:
-        logging.error(__name__ + '::Missing utm_touched for cohort %s.' %
-                                 str(utm_id))
-        utm_touched = datetime.now()
-
-    del conn
-    return utm_touched.strftime(DATETIME_STR_FORMAT)
-
-
-def get_data(request_meta, hash_result=True):
+def get_data(request, hash_result=True):
     """
         Extract data from the global hash given a request object.  If an item
         is successfully recovered data is returned
     """
 
+    request_obj = build_request_obj(request)
     hash_table_ref = read_pickle_data()
 
     # Traverse the hash key structure to find data
@@ -131,9 +100,9 @@ def get_data(request_meta, hash_result=True):
 
     logging.debug(__name__ + " - Attempting to pull data for request " \
                              "COHORT {0}, METRIC {1}".
-                  format(request_meta.cohort_expr, request_meta.metric))
+                  format(request_obj.cohort_expr, request_obj.metric))
 
-    key_sig = build_key_signature(request_meta, hash_result=hash_result)
+    key_sig = build_key_signature(request_obj, hash_result=hash_result)
     item = find_item(hash_table_ref, key_sig)
 
     if item:

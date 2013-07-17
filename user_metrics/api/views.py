@@ -21,14 +21,11 @@ from flask import Flask, render_template, Markup, redirect, url_for, \
 
 from user_metrics.etl.data_loader import Connector
 from user_metrics.config import logging, settings
-from user_metrics.api.engine.data import get_cohort_refresh_datetime, \
-    get_data, get_url_from_keys, build_key_signature, read_pickle_data
-from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
+from user_metrics.api.engine.data import get_data, get_url_from_keys, \
+    read_pickle_data
+from user_metrics.api import error_codes, query_mod, \
     REQUEST_BROKER_TARGET, umapi_broker_context
-from user_metrics.api.engine.request_meta import filter_request_input, \
-    format_request_params, RequestMetaFactory, \
-    get_metric_names
-from user_metrics.metrics.users import MediaWikiUser
+from user_metrics.api.engine.request_meta import get_metric_names
 from user_metrics.api.session import APIUser
 import user_metrics.config.settings as conf
 from hashlib import sha1
@@ -383,79 +380,40 @@ def cohort(cohort=''):
                                m_list=get_metric_names(), error=error)
 
 
-def output(cohort, metric):
-    """ View corresponding to a data request -
-        All of the setup and execution for a request happens here. """
+def output():
+    """
+    View corresponding to a data request.  Fetches response if it exists or adds
+    request to the request broker target.
+    """
 
     # Check for refresh flag
     refresh = True if 'refresh' in request.args else False
 
-    # Get the refresh date of the cohort
-    try:
-        cid = query_mod.get_cohort_id(cohort)
-        cohort_refresh_ts = get_cohort_refresh_datetime(cid)
-    except Exception:
-        cohort_refresh_ts = None
-        logging.error(__name__ + ' :: Could not retrieve refresh '
-                                 'time of cohort.')
-
-    # Build a request and validate.
-    #
-    # 1. Populate with request parameters from query args.
-    # 2. Filter the input discarding any url junk
-    # 3. Process defaults for request parameters
-    # 4. See if this maps to a single user request
-    # 5. See if this maps to a single user request
-    try:
-        rm = RequestMetaFactory(cohort, cohort_refresh_ts, metric)
-    except MetricsAPIError as e:
-        return redirect(url_for('all_cohorts') + '?error=' +
-                        str(e.error_code))
-
-    filter_request_input(request, rm)
-    try:
-        format_request_params(rm)
-    except MetricsAPIError as e:
-        return redirect(url_for('all_cohorts') + '?error=' +
-                        str(e.error_code))
-
-    if rm.is_user:
-        project = rm.project if rm.project else 'enwiki'
-        if not MediaWikiUser.is_user_name(cohort, project):
-            logging.error(__name__ + ' :: "{0}" is not a valid username '
-                                     'in "{1}"'.format(cohort, project))
-            return redirect(url_for('all_cohorts') + '?error=3')
-    else:
-        # @TODO CALL COHORT VALIDATION HERE
-        pass
-
-    # Determine if the request maps to an existing response.
-    #
-    # 1. The response already exists in the hash, return.
-    # 2. Otherwise, add the request tot the queue.
-    data = get_data(rm)
-    key_sig = build_key_signature(rm, hash_result=True)
+    data = get_data(request.url)
 
     # Is the request already running?
     # TODO check req_target
+    is_queued = False
     is_running = False
 
-    # Determine if request is already hashed
+    # Determine if response is already cached
     if data and not refresh:
         return make_response(jsonify(data))
 
+    # Determine if the job is already queued
+    elif is_queued:
+        return render_template('processing.html', error=error_codes[6])
+
     # Determine if the job is already running
     elif is_running:
-        return render_template('processing.html',
-                               error=error_codes[0],
-                               url_str=str(rm))
+        return render_template('processing.html', error=error_codes[0])
 
     # Add the request to the queue
     else:
-        hash = sha1(request.url.encode('utf-8')).hexdigest()
-        umapi_broker_context.add(REQUEST_BROKER_TARGET, hash, request.url)
+        url_hash = sha1(request.url.encode('utf-8')).hexdigest()
+        umapi_broker_context.add(REQUEST_BROKER_TARGET, url_hash, request.url)
 
-    return render_template('processing.html', url_str=str(rm))
+        return render_template('processing.html')
 
 
 def job_queue():

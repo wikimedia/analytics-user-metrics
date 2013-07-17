@@ -12,6 +12,7 @@ from user_metrics.api.broker import FileBroker
 
 REQUEST_BROKER_TARGET = 'request_broker.txt'
 RESPONSE_BROKER_TARGET = 'response_broker.txt'
+PROCESS_BROKER_TARGET = 'process_broker.txt'
 
 umapi_broker_context = FileBroker()
 
@@ -32,6 +33,7 @@ error_codes = {
     3: 'Could not find User ID.',
     4: 'Bad metric name.',
     5: 'Failed to retrieve users.',
+    6: 'Job is currently queued.',
 }
 
 

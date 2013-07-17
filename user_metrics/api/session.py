@@ -30,7 +30,7 @@ if settings.__flask_login_exists__:
         check_password_hash
 
     from flask.ext.login import LoginManager, current_user, UserMixin, \
-        AnonymousUser, confirm_login
+        AnonymousUserMixin, confirm_login
 
     class APIUser(UserMixin):
         """
@@ -126,7 +126,7 @@ if settings.__flask_login_exists__:
                         format(self.name))
                 self.active = True
 
-    class Anonymous(AnonymousUser):
+    class Anonymous(AnonymousUserMixin):
         name = u'Anonymous'
 
     login_manager = LoginManager()
