@@ -38,9 +38,9 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.utils import format_mediawiki_timestamp, enum
 from user_metrics.utils.record_type import recordtype
-from user_metrics.api import MetricsAPIError
-from user_metrics.api.engine import DEFAULT_QUERY_VAL
-from user_metrics.metrics.users import USER_METRIC_PERIOD_TYPE
+from user_metrics.api import MetricsAPIError, query_mod
+from user_metrics.api.engine import DEFAULT_QUERY_VAL, get_cohort_refresh_datetime
+from user_metrics.metrics.users import USER_METRIC_PERIOD_TYPE,MediaWikiUser
 from collections import namedtuple, OrderedDict
 from flask import escape
 from user_metrics.config import logging
@@ -62,7 +62,7 @@ REQUEST_VALUE_MAPPING = {
 }
 
 
-def parse_request(request):
+def parse_raw_request(request):
     """
     Parses umapi requests
     """
@@ -111,6 +111,46 @@ def RequestMetaFactory(cohort_expr, cohort_gen_timestamp, metric_expr):
 
     rt = recordtype("RequestMeta", params)
     return eval('rt' + arg_str)
+
+
+def build_request_obj(request):
+    """
+    Build a request and validate.
+
+        1. Populate with request parameters from query args.
+        2. Filter the input discarding any url junk
+        3. Process defaults for request parameters
+        4. See if this maps to a single user request
+    """
+
+    parsed_req = parse_raw_request(request)
+
+    # Get the refresh date of the cohort
+    try:
+        cid = query_mod.get_cohort_id(parsed_req.cohort)
+        cohort_refresh_ts = get_cohort_refresh_datetime(cid)
+
+    except Exception:
+        cohort_refresh_ts = None
+        logging.error(__name__ + ' :: Could not retrieve refresh '
+                                 'time of cohort.')
+
+    rm = RequestMetaFactory(parsed_req.cohort, cohort_refresh_ts,
+                                parsed_req.metric)
+    filter_request_input(request, rm)
+    format_request_params(rm)
+
+    if rm.is_user:
+        project = rm.project if rm.project else 'enwiki'
+        if not MediaWikiUser.is_user_name(parsed_req.cohort, project):
+            err_msg = __name__ + ' :: "{0}" is not a valid username ' \
+                                 'in "{1}"'.format(parsed_req.cohort, project)
+            raise MetricsAPIError(err_msg)
+    else:
+        # @TODO CALL COHORT VALIDATION HERE
+        pass
+
+    return rm
 
 # Defines what variables may be extracted from the query string
 REQUEST_META_QUERY_STR = ['aggregator', 'time_series', 'project', 'namespace',

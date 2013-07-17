@@ -84,9 +84,9 @@ __license__ = "GPL (version 2 or later)"
 from user_metrics.config import logging, settings
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
     REQUEST_BROKER_TARGET, umapi_broker_context,\
-    RESPONSE_BROKER_TARGET
+    RESPONSE_BROKER_TARGET, PROCESS_BROKER_TARGET
 from user_metrics.api.engine.data import get_users
-from user_metrics.api.engine.request_meta import rebuild_unpacked_request
+from user_metrics.api.engine.request_meta import build_request_obj
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.metrics.user_metric import UserMetricError
 
@@ -95,7 +95,7 @@ from collections import namedtuple
 from os import getpid
 from sys import getsizeof
 import time
-
+from hashlib import sha1
 
 # API JOB HANDLER
 # ###############
@@ -148,7 +148,13 @@ def job_control():
 
         logging.debug(log_name + ' - POLLING REQUESTS...')
         if concurrent_jobs <= MAX_CONCURRENT_JOBS:
+
+            # Pop from request target
             req_item = umapi_broker_context.pop(REQUEST_BROKER_TARGET)
+
+            # Push to process target
+            url_hash = sha1(req_item.encode('utf-8')).hexdigest()
+            umapi_broker_context.add(PROCESS_BROKER_TARGET, url_hash, req_item)
         else:
             continue
 
@@ -171,9 +177,13 @@ def job_control():
                 while not job_item.queue.empty():
                     data += job_item.queue.get(True)
 
-                # Put the response string
-                umapi_broker_context.add(RESPONSE_BROKER_TARGET,
-                                         [job_item.request, data])
+                # Remove from process target
+                url_hash = sha1(job_item.request.encode('utf-8')).hexdigest()
+                umapi_broker_context.remove(PROCESS_BROKER_TARGET, url_hash)
+
+                # Add to response target
+                umapi_broker_context.add(RESPONSE_BROKER_TARGET, url_hash,
+                                         str(''.join([job_item.request, '--', data])))
 
                 del job_queue[job_queue.index(job_item)]
                 concurrent_jobs -= 1
@@ -201,7 +211,7 @@ def job_control():
     logging.debug('{0} - FINISHING.'.format(log_name))
 
 
-def process_metrics(p, request_meta):
+def process_metrics(p, request):
     """
         Worker process for requests, forked from the job controller.  This
         method handles:
@@ -214,19 +224,23 @@ def process_metrics(p, request_meta):
     log_name = '{0} :: {1}'.format(__name__, process_metrics.__name__)
 
     logging.info(log_name + ' - START JOB'
-                            '\n\tCOHORT = {0} - METRIC = {1}'
-                            ' -  PID = {2})'.
-                 format(request_meta.cohort_expr, request_meta.metric,
-                        getpid()))
+                            '\n\t{0} -  PID = {2})'.
+                 format(request, getpid()))
 
     err_msg = __name__ + ' :: Request failed.'
     users = list()
 
+    try:
+        request_obj = build_request_obj(request)
+    except MetricsAPIError as e:
+        # TODO - flag job as failed
+        return
+
     # obtain user list - handle the case where a lone user ID is passed
     # !! The username should already be validated
-    if request_meta.is_user:
-        uid = MediaWikiUser.is_user_name(request_meta.cohort_expr,
-                                         request_meta.project)
+    if request_obj.is_user:
+        uid = MediaWikiUser.is_user_name(request_obj.cohort_expr,
+                                         request_obj.project)
         if uid:
             valid = True
             users = [uid]
@@ -235,13 +249,13 @@ def process_metrics(p, request_meta):
             err_msg = error_codes[3]
 
     # The "all" user group.  All users within a time period.
-    elif request_meta.cohort_expr == 'all':
+    elif request_obj.cohort_expr == 'all':
         users = MediaWikiUser(query_type=1)
 
         try:
             users = [u for u in users.get_users(
-                request_meta.start, request_meta.end,
-                project=request_meta.project)]
+                request_obj.start, request_obj.end,
+                project=request_obj.project)]
             valid = True
         except Exception:
             valid = False
@@ -249,13 +263,13 @@ def process_metrics(p, request_meta):
 
     # "TYPICAL" COHORT PROCESSING
     else:
-        users = get_users(request_meta.cohort_expr)
+        users = get_users(request_obj.cohort_expr)
 
         # Default project is what is stored in usertags_meta
         project = query_mod.get_cohort_project_by_meta(
-            request_meta.cohort_expr)
+            request_obj.cohort_expr)
         if project:
-            request_meta.project = project
+            request_obj.project = project
         logging.debug(__name__ + ' :: Using default project from '
                                  'usertags_meta {0}.'.format(project))
 
@@ -264,7 +278,7 @@ def process_metrics(p, request_meta):
 
     if valid:
         # process request
-        results = process_data_request(request_meta, users)
+        results = process_data_request(request_obj, users)
         results = str(results)
         response_size = getsizeof(results, None)
 
@@ -280,14 +294,14 @@ def process_metrics(p, request_meta):
 
         logging.info(log_name + ' - END JOB'
                                 '\n\tCOHORT = {0}- METRIC = {1} -  PID = {2})'.
-                     format(request_meta.cohort_expr, request_meta.metric,
+                     format(request_obj.cohort_expr, request_obj.metric,
                             getpid()))
 
     else:
         p.put(err_msg, block=True)
         logging.info(log_name + ' - END JOB - FAILED.'
                                 '\n\tCOHORT = {0}- METRIC = {1} -  PID = {2})'.
-                     format(request_meta.cohort_expr, request_meta.metric,
+                     format(request_obj.cohort_expr, request_obj.metric,
                             getpid()))
 
 # REQUEST FLOW HANDLER

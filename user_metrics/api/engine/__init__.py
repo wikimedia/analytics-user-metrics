@@ -35,7 +35,11 @@ __date__ = "january 11 2012"
 __license__ = "GPL (version 2 or later)"
 
 from re import search
+from user_metrics.config import settings, logging
 from user_metrics.api import MetricsAPIError, query_mod
+from datetime import datetime
+import user_metrics.etl.data_loader as dl
+
 
 #
 # Define remaining constants
@@ -119,3 +123,30 @@ def intersect_ids(cohort_id_list):
         for key in user_ids:
             if user_ids[key] > 1:
                 yield key
+
+
+def get_cohort_refresh_datetime(utm_id):
+    """
+        Get the latest refresh datetime of a cohort.  Returns current time
+        formatted as a string if the field is not found.
+    """
+
+    # @TODO MOVE DB REFS INTO QUERY MODULE
+    conn = dl.Connector(instance=settings.__cohort_data_instance__)
+    query = """ SELECT utm_touched FROM usertags_meta WHERE utm_id = %s """
+    conn._cur_.execute(query, int(utm_id))
+
+    utm_touched = None
+    try:
+        utm_touched = conn._cur_.fetchone()[0]
+    except ValueError:
+        pass
+
+    # Ensure the field was retrieved
+    if not utm_touched:
+        logging.error(__name__ + '::Missing utm_touched for cohort %s.' %
+                                 str(utm_id))
+        utm_touched = datetime.now()
+
+    del conn
+    return utm_touched.strftime(DATETIME_STR_FORMAT)
