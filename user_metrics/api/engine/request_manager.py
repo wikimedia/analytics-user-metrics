@@ -85,6 +85,7 @@ from user_metrics.config import logging, settings
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
     REQUEST_BROKER_TARGET, umapi_broker_context,\
     RESPONSE_BROKER_TARGET, PROCESS_BROKER_TARGET
+from user_metrics.api.engine import pack_response_for_broker
 from user_metrics.api.engine.data import get_users
 from user_metrics.api.engine.request_meta import build_request_obj
 from user_metrics.metrics.users import MediaWikiUser
@@ -183,7 +184,8 @@ def job_control():
 
                 # Add to response target
                 umapi_broker_context.add(RESPONSE_BROKER_TARGET, url_hash,
-                                         str(''.join([job_item.request, '--', data])))
+                                         pack_response_for_broker(
+                                             job_item.request, data))
 
                 del job_queue[job_queue.index(job_item)]
                 concurrent_jobs -= 1
