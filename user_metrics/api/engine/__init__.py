@@ -56,6 +56,8 @@ DATETIME_STR_FORMAT = "%Y-%m-%d %H:%M:%S"
 # The default value for non-assigned and valid values in the query string
 DEFAULT_QUERY_VAL = 'present'
 
+# DELIMETER FOR RESPONSE IN BROKER
+RESPONSE_DELIMETER = '<&>'
 
 #
 # Cohort parsing methods
@@ -150,3 +152,17 @@ def get_cohort_refresh_datetime(utm_id):
 
     del conn
     return utm_touched.strftime(DATETIME_STR_FORMAT)
+
+
+def pack_response_for_broker(request, data):
+    """
+    Packs up response data for broker
+    """
+    return str(''.join([request, RESPONSE_DELIMETER, data]))
+
+
+def unpack_response_for_broker(value):
+    """
+    unpacks up response data from broker
+    """
+    return value.split(RESPONSE_DELIMETER)
