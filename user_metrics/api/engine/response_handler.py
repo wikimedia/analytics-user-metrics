@@ -10,7 +10,8 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.api import RESPONSE_BROKER_TARGET, umapi_broker_context
 from user_metrics.config import logging
-from user_metrics.api.engine.request_meta import rebuild_unpacked_request
+from user_metrics.api.engine import unpack_response_for_broker
+from user_metrics.api.engine.request_meta import build_request_obj
 from user_metrics.api.engine.data import set_data, build_key_signature
 
 import time
@@ -40,16 +41,14 @@ def process_response():
         if not res_item:
             continue
 
-        request_meta = rebuild_unpacked_request(res_item)
-        key_sig = build_key_signature(request_meta, hash_result=True)
+        request, data = unpack_response_for_broker(res_item)
+        request_obj = build_request_obj(request)
 
         # Add result to cache once completed
         # TODO - umapi_broker_context.add(target, key_sig, res_item)
 
         logging.debug(log_name + ' - Setting data for {0}'.format(
-            str(request_meta)))
-        set_data(stream, request_meta)
-
-
+            str(request_obj)))
+        set_data(data, request_obj)
 
     logging.debug(log_name + ' - SHUTTING DOWN...')
