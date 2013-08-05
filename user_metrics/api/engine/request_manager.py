@@ -90,7 +90,6 @@ from user_metrics.api.engine.request_meta import rebuild_unpacked_request
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.metrics.user_metric import UserMetricError
 from user_metrics.utils import unpack_fields
-from user_metrics.api.broker import FileBroker
 
 from multiprocessing import Process, Queue
 from collections import namedtuple
