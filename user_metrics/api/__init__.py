@@ -17,10 +17,6 @@ umapi_broker_context = FileBroker()
 
 query_mod = nested_import(settings.__query_module__)
 
-# Lock for request notification callback operations
-# defined in request_manager.py
-REQ_NCB_LOCK = Lock()
-
 # The url path that precedes an API request
 REQUEST_PATH = 'cohorts/'
 
