@@ -83,13 +83,13 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.config import logging, settings
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
-    REQ_NCB_LOCK, REQUEST_PATH, REQUEST_BROKER_TARGET, umapi_broker_context
+    REQ_NCB_LOCK, REQUEST_PATH, REQUEST_BROKER_TARGET, umapi_broker_context,\
+    RESPONSE_BROKER_TARGET
 from user_metrics.api.engine.data import get_users, get_url_from_keys, \
     build_key_signature
 from user_metrics.api.engine.request_meta import rebuild_unpacked_request
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.metrics.user_metric import UserMetricError
-from user_metrics.utils import unpack_fields
 
 from multiprocessing import Process, Queue
 from collections import namedtuple
@@ -101,10 +101,6 @@ from time import sleep
 
 # API JOB HANDLER
 # ###############
-
-# API queues for API service requests and responses
-api_response_queue = Queue()
-
 
 # MODULE CONSTANTS
 #
@@ -120,7 +116,7 @@ QUEUE_WAIT = 5
 job_item_type = namedtuple('JobItem', 'id process request queue')
 
 
-def job_control(response_queue):
+def job_control():
     """
         Controls the execution of user metrics requests
 
@@ -157,34 +153,17 @@ def job_control(response_queue):
                                  '\n\tCOHORT = {0} - METRIC = {1}'
             .format(req_item['cohort_expr'], req_item['metric']))
 
-
         # Process complete jobs
         # ---------------------
 
         for job_item in job_queue:
 
-            # Look for completed jobs
-            if not job_item.queue.empty():
-
-                # Put request creds on res queue -- this goes to
-                # response_handler asynchronously
-                response_queue.put(unpack_fields(job_item.request),
-                                   block=True)
-
-                # Pull data off of the queue and add it to response queue
-                while not job_item.queue.empty():
-                    data = job_item.queue.get(True)
-                    if data:
-                        response_queue.put(data, block=True)
-
-                del job_queue[job_queue.index(job_item)]
-
-                concurrent_jobs -= 1
-
-                logging.debug(log_name + ' :: RUN -> RESPONSE - Job ID {0}' \
-                                         '\n\tConcurrent jobs = {1}'
-                    .format(str(job_item.id), concurrent_jobs))
-
+            umapi_broker_context.add(RESPONSE_BROKER_TARGET, job_item.request)
+            del job_queue[job_queue.index(job_item)]
+            concurrent_jobs -= 1
+            logging.debug(log_name + ' :: RUN -> RESPONSE - Job ID {0}'\
+                                     '\n\tConcurrent jobs = {1}'
+            .format(str(job_item.id), concurrent_jobs))
 
         # Process pending jobs
         # --------------------
