@@ -380,10 +380,12 @@ def cohort(cohort=''):
                                m_list=get_metric_names(), error=error)
 
 
-def output():
+def output(cohort, metric):
     """
     View corresponding to a data request.  Fetches response if it exists or adds
     request to the request broker target.
+
+    TODO - change app.route to accept regex to avoid passing unused vars
     """
 
     # Check for refresh flag
