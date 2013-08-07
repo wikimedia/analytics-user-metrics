@@ -154,8 +154,11 @@ def job_control():
             req_item = umapi_broker_context.pop(REQUEST_BROKER_TARGET)
 
             # Push to process target
-            url_hash = sha1(req_item.encode('utf-8')).hexdigest()
-            umapi_broker_context.add(PROCESS_BROKER_TARGET, url_hash, req_item)
+            if req_item:
+                url_hash = sha1(req_item.encode('utf-8')).hexdigest()
+                umapi_broker_context.add(PROCESS_BROKER_TARGET, url_hash, req_item)
+            else:
+                continue
         else:
             continue
 
