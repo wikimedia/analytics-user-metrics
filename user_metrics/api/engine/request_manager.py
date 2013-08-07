@@ -229,7 +229,7 @@ def process_metrics(p, request):
     log_name = '{0} :: {1}'.format(__name__, process_metrics.__name__)
 
     logging.info(log_name + ' - START JOB'
-                            '\n\t{0} -  PID = {2})'.
+                            '\n\t{0} -  PID = {1})'.
                  format(request, getpid()))
 
     err_msg = __name__ + ' :: Request failed.'
