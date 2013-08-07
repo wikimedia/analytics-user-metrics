@@ -391,7 +391,7 @@ def output(cohort, metric):
     # Check for refresh flag
     refresh = True if 'refresh' in request.args else False
 
-    data = get_data(request.url)
+    data = get_data(request)
 
     # Is the request already running?
     # TODO check req_target

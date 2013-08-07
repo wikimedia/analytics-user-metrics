@@ -75,8 +75,12 @@ def parse_raw_request(request):
     if len(bits) > 1:
         args_expr = [i.split('=') for i in bits[1].split('&')]
         args = recordtype('UM_REQUEST_ARGS', ' '.join([i[0] for i in args_expr]))
-        for i in args_expr:
-            setattr(args, i[0], i[1])
+        for arg in args_expr:
+            if len(arg) == 1:
+                # The arg is simply present
+                setattr(args, arg[0], True)
+            else:
+                setattr(args, arg[0], arg[1])
     return namedtuple('UM_REQUEST', 'cohort metric args')(cohort, metric, args)
 
 
@@ -123,7 +127,7 @@ def build_request_obj(request):
         4. See if this maps to a single user request
     """
 
-    parsed_req = parse_raw_request(request)
+    parsed_req = parse_raw_request(request.url)
 
     # Get the refresh date of the cohort
     try:
@@ -136,7 +140,7 @@ def build_request_obj(request):
                                  'time of cohort.')
 
     rm = RequestMetaFactory(parsed_req.cohort, cohort_refresh_ts,
-                                parsed_req.metric)
+                            parsed_req.metric)
     filter_request_input(request, rm)
     format_request_params(rm)
 
