@@ -71,10 +71,9 @@ def parse_raw_request(request):
     bits = bits[1].split('?')
     metric = bits[0]
 
-    args = namedtuple('UM_REQUEST_ARGS', '')
+    args = dict()
     if len(bits) > 1:
         args_expr = [i.split('=') for i in bits[1].split('&')]
-        args = dict()
         for arg in args_expr:
             if len(arg) == 1:
                 # The arg is simply present
