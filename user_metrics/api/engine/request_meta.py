@@ -117,7 +117,7 @@ def RequestMetaFactory(cohort_expr, cohort_gen_timestamp, metric_expr):
     return eval('rt' + arg_str)
 
 
-def build_request_obj(request):
+def build_request_obj(request_obj_raw, request_url):
     """
     Build a request and validate.
 
@@ -127,7 +127,7 @@ def build_request_obj(request):
         4. See if this maps to a single user request
     """
 
-    parsed_req = parse_raw_request(request.url)
+    parsed_req = parse_raw_request(request_url)
 
     # Get the refresh date of the cohort
     try:
@@ -141,7 +141,7 @@ def build_request_obj(request):
 
     rm = RequestMetaFactory(parsed_req.cohort, cohort_refresh_ts,
                             parsed_req.metric)
-    filter_request_input(request, rm)
+    filter_request_input(request_obj_raw, rm)
     format_request_params(rm)
 
     if rm.is_user:
