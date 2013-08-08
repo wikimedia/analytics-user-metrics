@@ -91,7 +91,7 @@ def get_data(request, hash_result=True):
         is successfully recovered data is returned
     """
 
-    request_obj = build_request_obj(request, request.url)
+    request_obj = build_request_obj(request.url)
     hash_table_ref = read_pickle_data()
 
     # Traverse the hash key structure to find data
