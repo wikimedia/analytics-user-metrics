@@ -87,7 +87,8 @@ from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
     RESPONSE_BROKER_TARGET, PROCESS_BROKER_TARGET
 from user_metrics.api.engine import pack_response_for_broker
 from user_metrics.api.engine.data import get_users
-from user_metrics.api.engine.request_meta import build_request_obj
+from user_metrics.api.engine.request_meta import build_request_obj, \
+    parse_raw_request
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.metrics.user_metric import UserMetricError
 
@@ -216,7 +217,7 @@ def job_control():
     logging.debug('{0} - FINISHING.'.format(log_name))
 
 
-def process_metrics(p, request):
+def process_metrics(p, request_url):
     """
         Worker process for requests, forked from the job controller.  This
         method handles:
@@ -230,13 +231,13 @@ def process_metrics(p, request):
 
     logging.info(log_name + ' - START JOB'
                             '\n\t{0} -  PID = {1})'.
-                 format(request, getpid()))
+                 format(request_url, getpid()))
 
     err_msg = __name__ + ' :: Request failed.'
     users = list()
 
     try:
-        request_obj = build_request_obj(request)
+        request_obj = build_request_obj(request_url)
     except MetricsAPIError as e:
         # TODO - flag job as failed
         return
