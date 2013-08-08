@@ -117,7 +117,7 @@ def RequestMetaFactory(cohort_expr, cohort_gen_timestamp, metric_expr):
     return eval('rt' + arg_str)
 
 
-def build_request_obj(request_obj_raw, request_url):
+def build_request_obj(request_url):
     """
     Build a request and validate.
 
@@ -141,7 +141,7 @@ def build_request_obj(request_obj_raw, request_url):
 
     rm = RequestMetaFactory(parsed_req.cohort, cohort_refresh_ts,
                             parsed_req.metric)
-    filter_request_input(request_obj_raw, rm)
+    filter_request_input(parsed_req, rm)
     format_request_params(rm)
 
     if rm.is_user:
