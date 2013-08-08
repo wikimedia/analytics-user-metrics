@@ -74,13 +74,13 @@ def parse_raw_request(request):
     args = namedtuple('UM_REQUEST_ARGS', '')
     if len(bits) > 1:
         args_expr = [i.split('=') for i in bits[1].split('&')]
-        args = recordtype('UM_REQUEST_ARGS', ' '.join([i[0] for i in args_expr]))
+        args = dict()
         for arg in args_expr:
             if len(arg) == 1:
                 # The arg is simply present
-                setattr(args, arg[0], True)
+                args[arg[0]] = True
             else:
-                setattr(args, arg[0], arg[1])
+                args[arg[0]] = arg[1]
     return namedtuple('UM_REQUEST', 'cohort metric args')(cohort, metric, args)
 
 
