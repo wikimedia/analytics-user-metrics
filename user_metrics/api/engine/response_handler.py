@@ -18,7 +18,7 @@ import time
 
 # Timeout in seconds to wait for data on the queue.  This should be long
 # enough to ensure that the full response can be received
-RESPONSE_TIMEOUT = 1.0
+RESPONSE_TIMEOUT = 3.0
 
 
 # API RESPONSE HANDLER

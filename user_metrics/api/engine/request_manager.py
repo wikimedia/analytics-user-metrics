@@ -109,7 +109,7 @@ from hashlib import sha1
 MAX_BLOCK_SIZE = 5000
 MAX_CONCURRENT_JOBS = 1
 QUEUE_WAIT = 5
-RESQUEST_TIMEOUT = 1.0
+RESQUEST_TIMEOUT = 3.0
 
 # Defines the job item type used to temporarily store job progress
 job_item_type = namedtuple('JobItem', 'id process request queue')
