@@ -184,7 +184,14 @@ def job_control():
 
                 # Remove from process target
                 url_hash = sha1(job_item.request.encode('utf-8')).hexdigest()
-                umapi_broker_context.remove(PROCESS_BROKER_TARGET, url_hash)
+                try:
+                    umapi_broker_context.remove(PROCESS_BROKER_TARGET, url_hash)
+                except Exception as e:
+                    logging.error(__name__ + ' :: Could not process '
+                                             '{0} from {1}  -- {2}'.
+                        format(job_item.request,
+                               PROCESS_BROKER_TARGET,
+                               e.message))
 
                 # Add to response target
                 umapi_broker_context.add(RESPONSE_BROKER_TARGET, url_hash,
