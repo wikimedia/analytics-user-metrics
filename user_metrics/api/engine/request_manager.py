@@ -87,8 +87,7 @@ from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
     RESPONSE_BROKER_TARGET, PROCESS_BROKER_TARGET
 from user_metrics.api.engine import pack_response_for_broker
 from user_metrics.api.engine.data import get_users
-from user_metrics.api.engine.request_meta import build_request_obj, \
-    parse_raw_request
+from user_metrics.api.engine.request_meta import build_request_obj
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.metrics.user_metric import UserMetricError
 
@@ -148,7 +147,8 @@ def job_control():
         # Request Queue Processing
         # ------------------------
 
-        logging.debug(log_name + ' - POLLING REQUESTS...')
+        logging.debug(log_name + ' :: POLLING REQUESTS...')
+        logging.debug(log_name + ' :: JOB QUEUE - {0}'.format(str(job_queue)))
         if concurrent_jobs <= MAX_CONCURRENT_JOBS:
 
             # Pop from request target
@@ -157,13 +157,15 @@ def job_control():
             # Push to process target
             if req_item:
                 url_hash = sha1(req_item.encode('utf-8')).hexdigest()
-                umapi_broker_context.add(PROCESS_BROKER_TARGET, url_hash, req_item)
+                umapi_broker_context.add(PROCESS_BROKER_TARGET, url_hash,
+                                         req_item)
             else:
                 continue
         else:
             continue
 
-        if not req_item:
+        # Continue if there is no request or the job_queue is empty
+        if not req_item and not concurrent_jobs:
             continue
 
         logging.debug(log_name + ' :: PULLING item from request queue -> '
@@ -177,6 +179,9 @@ def job_control():
 
             if not job_item.queue.empty():
 
+                logging.info(log_name + ' :: READING RESPONSE - {0}'.
+                    format(job_item.request))
+
                 # Pull data off of the queue and add it to response queue
                 data = ''
                 while not job_item.queue.empty():
@@ -185,9 +190,10 @@ def job_control():
                 # Remove from process target
                 url_hash = sha1(job_item.request.encode('utf-8')).hexdigest()
                 try:
-                    umapi_broker_context.remove(PROCESS_BROKER_TARGET, url_hash)
+                    umapi_broker_context.remove(PROCESS_BROKER_TARGET,
+                                                url_hash)
                 except Exception as e:
-                    logging.error(__name__ + ' :: Could not process '
+                    logging.error(log_name + ' :: Could not process '
                                              '{0} from {1}  -- {2}'.
                         format(job_item.request,
                                PROCESS_BROKER_TARGET,
@@ -236,7 +242,7 @@ def process_metrics(p, request_url):
 
     log_name = '{0} :: {1}'.format(__name__, process_metrics.__name__)
 
-    logging.info(log_name + ' - START JOB'
+    logging.info(log_name + ' :: START JOB'
                             '\n\t{0} -  PID = {1})'.
                  format(request_url, getpid()))
 
@@ -305,14 +311,14 @@ def process_metrics(p, request_url):
         else:
             p.put(results, block=True)
 
-        logging.info(log_name + ' - END JOB'
+        logging.info(log_name + ' :: END JOB'
                                 '\n\tCOHORT = {0}- METRIC = {1} -  PID = {2})'.
                      format(request_obj.cohort_expr, request_obj.metric,
                             getpid()))
 
     else:
         p.put(err_msg, block=True)
-        logging.info(log_name + ' - END JOB - FAILED.'
+        logging.info(log_name + ' :: END JOB - FAILED.'
                                 '\n\tCOHORT = {0}- METRIC = {1} -  PID = {2})'.
                      format(request_obj.cohort_expr, request_obj.metric,
                             getpid()))
