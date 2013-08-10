@@ -283,7 +283,7 @@ def process_metrics(p, request_url):
             request_obj.cohort_expr)
         if project:
             request_obj.project = project
-        logging.debug(__name__ + ' :: Using default project from '
+        logging.debug(log_name + ' :: Using default project from '
                                  'usertags_meta {0}.'.format(project))
 
         valid = True
