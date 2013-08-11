@@ -136,6 +136,24 @@ class FileBroker(Broker):
 
             return None
 
+    def get_all_itmes(self, target):
+        """
+        Retrieve all values in the target
+        """
+        all_keys = list()
+        try:
+            with open(target, 'r') as f:
+                lines = f.read().split('\n')
+                for idx, line in enumerate(lines):
+                    item = json.loads(line)
+                    all_keys.append(item)
+        except IOError:
+            with open(target, 'w'):
+                pass
+
+            return None
+        return all_keys
+
     def pop(self, target):
         """
         Pop the top value from the list
