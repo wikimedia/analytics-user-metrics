@@ -24,7 +24,8 @@ from user_metrics.config import logging, settings
 from user_metrics.api.engine.data import get_data, get_url_from_keys, \
     read_pickle_data
 from user_metrics.api import error_codes, query_mod, \
-    REQUEST_BROKER_TARGET, umapi_broker_context
+    REQUEST_BROKER_TARGET, umapi_broker_context, RESPONSE_BROKER_TARGET, \
+    PROCESS_BROKER_TARGET
 from user_metrics.api.engine.request_meta import get_metric_names
 from user_metrics.api.session import APIUser
 import user_metrics.config.settings as conf
@@ -428,6 +429,13 @@ def job_queue():
                          '</th></tr></thead>\n<tbody>\n'))
 
     # Get keys from broker target
+
+    umapi_broker_context.add(REQUEST_BROKER_TARGET, url_hash, request.url)
+
+    items_req = umapi_broker_context.get_all_itmes(REQUEST_BROKER_TARGET)
+    items_res = umapi_broker_context.get_all_itmes(RESPONSE_BROKER_TARGET)
+    items_proc = umapi_broker_context.get_all_itmes(PROCESS_BROKER_TARGET)
+
     keys = []
     for key in keys:
         # Log the status of the job
