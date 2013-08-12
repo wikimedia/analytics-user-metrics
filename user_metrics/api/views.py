@@ -425,33 +425,35 @@ def job_queue():
     error = get_errors(request.args)
 
     p_list = list()
-    p_list.append(Markup('<thead><tr><th>is_alive</th><th>url'
+    p_list.append(Markup('<thead><tr><th>state</th><th>url'
                          '</th></tr></thead>\n<tbody>\n'))
 
-    # Get keys from broker target
-
-    umapi_broker_context.add(REQUEST_BROKER_TARGET, url_hash, request.url)
-
+    # Get keys from broker targets
     items_req = umapi_broker_context.get_all_itmes(REQUEST_BROKER_TARGET)
     items_res = umapi_broker_context.get_all_itmes(RESPONSE_BROKER_TARGET)
     items_proc = umapi_broker_context.get_all_itmes(PROCESS_BROKER_TARGET)
 
-    keys = []
-    for key in keys:
-        # Log the status of the job
-        #   TODO this will be part of the broker data
-        url = ''
-        is_alive = False
+    logging.info(str(items_req))
+    logging.info(str(items_res))
+    logging.info(str(items_proc))
 
-        p_list.append('<tr><td>')
-        response_url = "".join(['<a href="',
-                                request.url_root,
-                                url + '">', url, '</a>'])
-        p_list.append("</td><td>".join([is_alive,
-                                        escape(Markup(response_url)),
-                                        ]))
-        p_list.append(Markup('</td></tr>'))
-    p_list.append(Markup('\n</tbody>'))
+    for item in items_req:
+        url = item[item.keys()[0]]
+        row_markup = '<tr><td>{0}</td><td><a href="{1}">{2}</a></td></tr>'\
+            .format('request pending', url, url)
+        p_list.append(Markup(row_markup))
+
+    for item in items_req:
+        url = item[item.keys()[0]]
+        row_markup = '<tr><td>{0}</td><td><a href="{1}">{2}</a></td></tr>'\
+            .format('response generating', url, url)
+        p_list.append(Markup(row_markup))
+
+    for item in items_proc:
+        url = item[item.keys()[0]]
+        row_markup = '<tr><td>{0}</td><td><a href="{1}">{2}</a></td></tr>'\
+            .format('processing', url, url)
+        p_list.append(Markup(row_markup))
 
     if error:
         return render_template('queue.html', procs=p_list, error=error)
