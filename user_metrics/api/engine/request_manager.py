@@ -164,9 +164,9 @@ def job_control():
                 umapi_broker_context.add(PROCESS_BROKER_TARGET, url_hash,
                                          req_item)
 
-            logging.debug(log_name + ' :: PULLING item from request queue -> '
-                                     '\n\t{0}'
-                          .format(req_item))
+                logging.debug(log_name + ' :: PULLING item from request queue -> '
+                                         '\n\t{0}'
+                              .format(req_item))
 
         # Process complete jobs
         # ---------------------
