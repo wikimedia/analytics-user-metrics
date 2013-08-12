@@ -56,6 +56,12 @@ In user_metrics/config run `cp settings.py.example settings.py` and configure as
 datasource hosts are reachable from your environment.  To run the server execute:
 
 	$ python user_metrics/api/run.py
+	$ python user_metrics/api/run_handlers.py
+
+The module run.py initiates the flask web server and is also the wsgi target if the instance is being run via Apache.
+Also it is necessary to execute run_handlers.py which initiates the job handling processes.  If you are running the
+service through Apache this module will need to be initiated independently, it utilizes the queues that are
+visible to the http view targets.
 
 Once installed you will need to modify the configuration files.  This
 can be found in the file `settings.py` under
