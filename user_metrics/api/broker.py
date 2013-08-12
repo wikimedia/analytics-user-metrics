@@ -145,7 +145,12 @@ class FileBroker(Broker):
             with open(target, 'r') as f:
                 lines = f.read().split('\n')
                 for idx, line in enumerate(lines):
-                    item = json.loads(line)
+                    try:
+                        item = json.loads(line)
+                    except Exception:
+                        logging.error(__name__ + ' :: Could not parse JSON '
+                                                 'from: {0}'.format(line))
+                        continue
                     all_keys.append(item)
         except IOError:
             with open(target, 'w'):
