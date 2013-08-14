@@ -429,9 +429,9 @@ def job_queue():
                          '</th></tr></thead>\n<tbody>\n'))
 
     # Get keys from broker targets
-    items_req = umapi_broker_context.get_all_itmes(REQUEST_BROKER_TARGET)
-    items_res = umapi_broker_context.get_all_itmes(RESPONSE_BROKER_TARGET)
-    items_proc = umapi_broker_context.get_all_itmes(PROCESS_BROKER_TARGET)
+    items_req = umapi_broker_context.get_all_items(REQUEST_BROKER_TARGET)
+    items_res = umapi_broker_context.get_all_items(RESPONSE_BROKER_TARGET)
+    items_proc = umapi_broker_context.get_all_items(PROCESS_BROKER_TARGET)
 
     logging.info(str(items_req))
     logging.info(str(items_res))

@@ -136,7 +136,7 @@ class FileBroker(Broker):
 
             return None
 
-    def get_all_itmes(self, target):
+    def get_all_items(self, target):
         """
         Retrieve all values in the target
         """
