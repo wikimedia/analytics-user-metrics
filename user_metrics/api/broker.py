@@ -47,6 +47,12 @@ class Broker(object):
         """
         raise NotImplementedError()
 
+    def get_all_items(self, target):
+        """
+        Retrieve all values in the target
+        """
+        raise NotImplementedError()
+
     def pop(self, target):
         """
         Pop the first item off of the queue
