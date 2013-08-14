@@ -66,7 +66,7 @@ def parse_raw_request(request):
     """
     Parses umapi requests
     """
-    bits = request.split('/')[4:]
+    bits = request.split('/')
     cohort = bits[0]
     bits = bits[1].split('?')
     metric = bits[0]

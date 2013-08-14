@@ -85,13 +85,13 @@ def get_users(cohort_expr):
     return users
 
 
-def get_data(request, hash_result=True):
+def get_data(url, hash_result=True):
     """
         Extract data from the global hash given a request object.  If an item
         is successfully recovered data is returned
     """
 
-    request_obj = build_request_obj(request.url)
+    request_obj = build_request_obj(url)
     hash_table_ref = read_pickle_data()
 
     # Traverse the hash key structure to find data
