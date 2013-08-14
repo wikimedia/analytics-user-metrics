@@ -389,15 +389,19 @@ def output(cohort, metric):
     TODO - change app.route to accept regex to avoid passing unused vars
     """
 
+    # Generate url hash
+    url_hash = sha1(request.url.encode('utf-8')).hexdigest()
+
     # Check for refresh flag
     refresh = True if 'refresh' in request.args else False
-
     data = get_data(request)
 
-    # Is the request already running?
-    # TODO check req_target
-    is_queued = False
-    is_running = False
+    # Is the request already running or queued?
+    is_queued = umapi_broker_context.is_item(REQUEST_BROKER_TARGET, url_hash)
+    is_running = umapi_broker_context.is_item(PROCESS_BROKER_TARGET, url_hash)
+
+    logging.info(__name__ + ' :: REQ {0}:{1}\n\tqueued={2}\n\tprocessing={3}'.
+        format(url_hash, request.url, str(is_queued), str(is_running)))
 
     # Determine if response is already cached
     if data and not refresh:
@@ -413,7 +417,6 @@ def output(cohort, metric):
 
     # Add the request to the queue
     else:
-        url_hash = sha1(request.url.encode('utf-8')).hexdigest()
         umapi_broker_context.add(REQUEST_BROKER_TARGET, url_hash, request.url)
 
         return render_template('processing.html')
@@ -432,10 +435,6 @@ def job_queue():
     items_req = umapi_broker_context.get_all_items(REQUEST_BROKER_TARGET)
     items_res = umapi_broker_context.get_all_items(RESPONSE_BROKER_TARGET)
     items_proc = umapi_broker_context.get_all_items(PROCESS_BROKER_TARGET)
-
-    logging.info(str(items_req))
-    logging.info(str(items_res))
-    logging.info(str(items_proc))
 
     for item in items_req:
         url = item[item.keys()[0]]
