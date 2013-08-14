@@ -442,7 +442,7 @@ def job_queue():
             .format('request pending', url, url)
         p_list.append(Markup(row_markup))
 
-    for item in items_req:
+    for item in items_res:
         url = item[item.keys()[0]]
         row_markup = '<tr><td>{0}</td><td><a href="{1}">{2}</a></td></tr>'\
             .format('response generating', url, url)
