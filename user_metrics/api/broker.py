@@ -65,10 +65,18 @@ class Broker(object):
         """
         raise NotImplementedError()
 
+    def is_item(self, target, key):
+        """
+        Return boolean indicating whether a key is in target
+        """
+        raise NotImplementedError()
+
 
 class FileBroker(Broker):
     """
     Implements a broker that uses a flat file as a broker
+
+    !! Operations are O(n), consider storing keys in heap
     """
 
     def __init__(self, **kwargs):
@@ -201,3 +209,9 @@ class FileBroker(Broker):
             with open(target, 'w'):
                 pass
         return None
+
+    def is_item(self, target, key):
+        """
+        Return boolean indicating whether a key is in target
+        """
+        return key in self.get_keys(target)
