@@ -47,6 +47,12 @@ class Broker(object):
         """
         raise NotImplementedError()
 
+    def get_keys(self, target):
+        """
+        Retrieve all keys in the broker
+        """
+        raise NotImplementedError()
+
     def get_all_items(self, target):
         """
         Retrieve all values in the target
@@ -141,6 +147,13 @@ class FileBroker(Broker):
                 pass
 
             return None
+
+    def get_keys(self, target):
+        """
+        Retrieve all keys in the broker target
+        """
+        items = self.get_all_items(target)
+        return [item.keys()[0] for item in items]
 
     def get_all_items(self, target):
         """
