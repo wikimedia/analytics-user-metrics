@@ -16,7 +16,7 @@ import operator
 import json
 
 from user_metrics.config import settings
-import user_metrics.metrics.user_metric as um
+from user_metrics.etl.aggregator import aggregator as agg_engine
 from user_metrics.utils import format_mediawiki_timestamp
 from multiprocessing import Process, Queue
 
@@ -218,7 +218,7 @@ def time_series_worker(time_series,
         metric_obj = metric(datetime_start=ts_s, datetime_end=ts_e, **new_kwargs).\
             process(cohort, **new_kwargs)
 
-        r = um.aggregator(aggregator, metric_obj, metric.header())
+        r = agg_engine(aggregator, metric_obj, metric.header())
 
         if log:
             logging.info(__name__ + ' :: Processing complete:\n'

@@ -90,6 +90,7 @@ from user_metrics.api.engine.data import get_users
 from user_metrics.api.engine.request_meta import build_request_obj
 from user_metrics.metrics.users import MediaWikiUser
 from user_metrics.metrics.user_metric import UserMetricError
+from user_metrics.etl.aggregator import aggregator as agg_engine
 
 from multiprocessing import Process, Queue
 from collections import namedtuple
@@ -464,7 +465,7 @@ def process_data_request(request_meta, users):
             results['data'] = str(e)
             return results
 
-        r = um.aggregator(aggregator_func, metric_obj, metric_obj.header())
+        r = agg_engine(aggregator_func, metric_obj, metric_obj.header())
         results['header'] = to_string(r.header)
         results['data'] = r.data[1:]
 
