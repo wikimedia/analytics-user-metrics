@@ -394,7 +394,11 @@ def output(cohort, metric):
     refresh = True if 'refresh' in request.args else False
 
     # Generate url hash - replace 'refresh' in url
-    url = re.sub(REFRESH_REGEX, '', request.script_root + request.path)
+    query_args = ''
+    if re.search('/?',request.url):
+        query_args = '?' + request.url.split('?')[-1]
+
+    url = re.sub(REFRESH_REGEX, '', request.script_root + request.path + query_args)
     url = re.sub('/cohorts/', '', url)
     url_hash = sha1(url.encode('utf-8')).hexdigest()
 
