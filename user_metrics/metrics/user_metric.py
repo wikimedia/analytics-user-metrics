@@ -79,38 +79,11 @@ def pre_metrics_init(init_f):
 # 2. header attribute for a type of metric aggregation methods
 # 3. name attribute for a type of metric aggregation methods
 # 4. keyword arg attribute for a type of metric aggregation methods
+# TODO - move these to the module dedicated for aggregation processing
 METRIC_AGG_METHOD_FLAG = 'metric_agg_flag'
 METRIC_AGG_METHOD_HEAD = 'metric_agg_head'
 METRIC_AGG_METHOD_NAME = 'metric_agg_name'
 METRIC_AGG_METHOD_KWARGS = 'metric_agg_kwargs'
-
-# Class for storing aggregate data
-aggregate_data_class = namedtuple("AggregateData", "header data")
-
-
-def aggregator(agg_method, metric, data_header):
-    """ Method for wrapping and executing aggregated data """
-
-    if hasattr(agg_method, METRIC_AGG_METHOD_FLAG) and getattr(
-            agg_method,  METRIC_AGG_METHOD_FLAG):
-        # These are metric specific aggregators.  The method must also define
-        # the header.
-        agg_header = getattr(agg_method, METRIC_AGG_METHOD_HEAD) if hasattr(
-            agg_method, METRIC_AGG_METHOD_HEAD) else 'No header specified.'
-
-        kwargs = getattr(agg_method, METRIC_AGG_METHOD_KWARGS) if hasattr(
-            agg_method, METRIC_AGG_METHOD_KWARGS) else {}
-
-        data = [getattr(agg_method, METRIC_AGG_METHOD_NAME)] + agg_method(
-            metric, **kwargs)
-    else:
-        # Generic aggregators that are metric agnostic
-        agg_header = ['type'] + [
-            data_header[i] for i in metric._agg_indices[agg_method.__name__]]
-        data = [agg_method.__name__] + agg_method(metric.__iter__(),
-                                                  metric._agg_indices[
-                                                  agg_method.__name__])
-    return aggregate_data_class(agg_header, data)
 
 
 def log_pool_worker_start(metric_name, worker_name, data, args):
