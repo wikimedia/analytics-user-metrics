@@ -412,17 +412,17 @@ def output(cohort, metric):
     logging.info(__name__ + ' :: REQ {0}:{1}\n\tqueued={2}\n\tprocessing={3}'.
         format(url_hash, url, str(is_queued), str(is_running)))
 
-    # Determine if response is already cached
-    if data and not refresh:
-        return make_response(jsonify(data))
-
     # Determine if the job is already queued
-    elif is_queued:
+    if is_queued:
         return render_template('processing.html', error=error_codes[6])
 
     # Determine if the job is already running
     elif is_running:
         return render_template('processing.html', error=error_codes[0])
+
+    # Determine if response is already cached
+    elif data and not refresh:
+        return make_response(jsonify(data))
 
     # Add the request to the queue
     else:
