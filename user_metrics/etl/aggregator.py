@@ -53,10 +53,6 @@ from types import FloatType
 from collections import namedtuple
 from itertools import izip
 from numpy import array, transpose
-from user_metrics.metrics.user_metric import METRIC_AGG_METHOD_FLAG, \
-    METRIC_AGG_METHOD_HEAD, \
-    METRIC_AGG_METHOD_KWARGS, \
-    METRIC_AGG_METHOD_NAME
 
 # Type used to carry aggregator meta data
 AggregatorMeta = namedtuple('AggregatorMeta', 'field_name index op')

@@ -5,7 +5,7 @@ __license__ = "GPL (version 2 or later)"
 
 from collections import namedtuple
 from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG, \
-    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD, METRIC_AGG_METHOD_KWARGS
 from user_metrics.metrics import user_metric as um
 from user_metrics.metrics import query_mod
 from user_metrics.etl.aggregator import weighted_rate, decorator_builder,\
@@ -143,12 +143,12 @@ class Blocks(um.UserMetric):
 block_rate_agg = weighted_rate
 block_rate_agg = decorator_builder(Blocks.header())(block_rate_agg)
 
-setattr(block_rate_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(block_rate_agg, um.METRIC_AGG_METHOD_NAME, 'b_rate_agg')
-setattr(block_rate_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(block_rate_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(block_rate_agg, METRIC_AGG_METHOD_NAME, 'b_rate_agg')
+setattr(block_rate_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                     'total_weight',
                                                     'rate'])
-setattr(block_rate_agg, um.METRIC_AGG_METHOD_KWARGS, {
+setattr(block_rate_agg, METRIC_AGG_METHOD_KWARGS, {
     'val_idx': 2,
 })
 
@@ -161,7 +161,7 @@ setattr(block_prop_agg, METRIC_AGG_METHOD_NAME, 'b_prop_agg')
 setattr(block_prop_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                     'total_blocks',
                                                     'proportion'])
-setattr(block_prop_agg, um.METRIC_AGG_METHOD_KWARGS, {
+setattr(block_prop_agg, METRIC_AGG_METHOD_KWARGS, {
     'val_idx': 1,
 })
 
