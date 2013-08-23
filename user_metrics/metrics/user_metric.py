@@ -70,21 +70,6 @@ def pre_metrics_init(init_f):
 
     return wrapper
 
-# Define aggregator processing methods, method attributes, and namedtuple
-# class for packaging aggregate data
-
-# Respectively:
-#
-# 1. flag attribute for a type of metric aggregation methods
-# 2. header attribute for a type of metric aggregation methods
-# 3. name attribute for a type of metric aggregation methods
-# 4. keyword arg attribute for a type of metric aggregation methods
-# TODO - move these to the module dedicated for aggregation processing
-METRIC_AGG_METHOD_FLAG = 'metric_agg_flag'
-METRIC_AGG_METHOD_HEAD = 'metric_agg_head'
-METRIC_AGG_METHOD_NAME = 'metric_agg_name'
-METRIC_AGG_METHOD_KWARGS = 'metric_agg_kwargs'
-
 
 def log_pool_worker_start(metric_name, worker_name, data, args):
     """
