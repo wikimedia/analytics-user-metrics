@@ -6,6 +6,8 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.config import logging
 
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG,\
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD
 import user_metric as um
 import user_metrics.utils.multiprocessing_wrapper as mpw
 from collections import namedtuple, OrderedDict
@@ -157,10 +159,10 @@ def namespace_edits_sum(metric):
         except (IndexError, TypeError):
             continue
     return summed_results
-setattr(namespace_edits_sum, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(namespace_edits_sum, um.METRIC_AGG_METHOD_NAME,
+setattr(namespace_edits_sum, METRIC_AGG_METHOD_FLAG, True)
+setattr(namespace_edits_sum, METRIC_AGG_METHOD_NAME,
         'namespace_edits_aggregates')
-setattr(namespace_edits_sum, um.METRIC_AGG_METHOD_HEAD, ['type',
+setattr(namespace_edits_sum, METRIC_AGG_METHOD_HEAD, ['type',
                                                          'total_revs',
                                                          'weighted_rate',
                                                          'total_editors',

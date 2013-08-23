@@ -6,6 +6,8 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.config import logging
 
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG,\
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD, METRIC_AGG_METHOD_KWARGS
 import user_metric as um
 import user_metrics.utils.multiprocessing_wrapper as mpw
 from collections import namedtuple
@@ -170,11 +172,11 @@ def live_accounts_agg(metric):
 live_accounts_agg = boolean_rate
 live_accounts_agg = decorator_builder(LiveAccount.header())(live_accounts_agg)
 
-setattr(live_accounts_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(live_accounts_agg, um.METRIC_AGG_METHOD_NAME, 'live_accounts_agg')
-setattr(live_accounts_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(live_accounts_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(live_accounts_agg, METRIC_AGG_METHOD_NAME, 'live_accounts_agg')
+setattr(live_accounts_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                        'is_live', 'rate'])
-setattr(live_accounts_agg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
+setattr(live_accounts_agg, METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
 
 if __name__ == "__main__":
     users = ['17792132', '17797320', '17792130', '17792131', '17792136',

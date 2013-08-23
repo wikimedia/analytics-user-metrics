@@ -6,6 +6,8 @@ __license__ = "GPL (version 2 or later)"
 from user_metrics.config import logging
 
 import os
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG,\
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD, METRIC_AGG_METHOD_KWARGS
 import user_metrics.utils.multiprocessing_wrapper as mpw
 import user_metric as um
 from user_metrics.etl.aggregator import decorator_builder, boolean_rate
@@ -155,13 +157,13 @@ threshold_editors_agg = boolean_rate
 threshold_editors_agg = decorator_builder(Threshold.header())(
     threshold_editors_agg)
 
-setattr(threshold_editors_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(threshold_editors_agg, um.METRIC_AGG_METHOD_NAME,
+setattr(threshold_editors_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(threshold_editors_agg, METRIC_AGG_METHOD_NAME,
         'threshold_editors_agg')
-setattr(threshold_editors_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(threshold_editors_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                            'threshold_reached',
                                                            'rate'])
-setattr(threshold_editors_agg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
+setattr(threshold_editors_agg, METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
 
 # testing
 if __name__ == "__main__":

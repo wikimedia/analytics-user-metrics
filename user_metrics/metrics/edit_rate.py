@@ -5,6 +5,8 @@ __license__ = "GPL (version 2 or later)"
 
 from copy import deepcopy
 from dateutil.parser import parse as date_parse
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG,\
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD, METRIC_AGG_METHOD_KWARGS
 import user_metric as um
 import edit_count as ec
 from user_metrics.etl.aggregator import weighted_rate, decorator_builder, \
@@ -12,7 +14,6 @@ from user_metrics.etl.aggregator import weighted_rate, decorator_builder, \
 from numpy import median, min, max, mean, std
 from user_metrics.metrics.users import USER_METRIC_PERIOD_TYPE as umpt
 from user_metrics.utils import enum, format_mediawiki_timestamp
-from user_metrics.metrics.user_metric import METRIC_AGG_METHOD_KWARGS
 
 
 class EditRate(um.UserMetric):
@@ -150,11 +151,11 @@ class EditRate(um.UserMetric):
 edit_rate_agg = weighted_rate
 edit_rate_agg = decorator_builder(EditRate.header())(edit_rate_agg)
 
-setattr(edit_rate_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(edit_rate_agg, um.METRIC_AGG_METHOD_NAME, 'edit_rate_agg')
-setattr(edit_rate_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(edit_rate_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(edit_rate_agg, METRIC_AGG_METHOD_NAME, 'edit_rate_agg')
+setattr(edit_rate_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                    'total_weight', 'rate'])
-setattr(edit_rate_agg, um.METRIC_AGG_METHOD_KWARGS, {
+setattr(edit_rate_agg, METRIC_AGG_METHOD_KWARGS, {
     'val_idx': 2,
 })
 

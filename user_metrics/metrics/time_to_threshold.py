@@ -8,6 +8,8 @@ from user_metrics.config import logging
 from os import getpid
 
 from dateutil.parser import parse as date_parse
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG,\
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD, METRIC_AGG_METHOD_KWARGS
 import user_metric as um
 from user_metrics.etl.aggregator import weighted_rate, decorator_builder, \
     build_numpy_op_agg, build_agg_meta
@@ -180,12 +182,12 @@ def get_minute_diff_result(results, first, threshold):
 ttt_avg_agg = weighted_rate
 ttt_avg_agg = decorator_builder(TimeToThreshold.header())(ttt_avg_agg)
 
-setattr(ttt_avg_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(ttt_avg_agg, um.METRIC_AGG_METHOD_NAME, 'ttt_avg_agg')
-setattr(ttt_avg_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(ttt_avg_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(ttt_avg_agg, METRIC_AGG_METHOD_NAME, 'ttt_avg_agg')
+setattr(ttt_avg_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                  'total_weight',
                                                  'average'])
-setattr(ttt_avg_agg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
+setattr(ttt_avg_agg, METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
 
 
 metric_header = TimeToThreshold.header()

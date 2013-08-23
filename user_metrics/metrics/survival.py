@@ -3,6 +3,8 @@ __author__ = "Ryan Faulkner"
 __date__ = "December 6th, 2012"
 __license__ = "GPL (version 2 or later)"
 
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG,\
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD, METRIC_AGG_METHOD_KWARGS
 import user_metric as um
 import threshold as th
 from user_metrics.etl.aggregator import decorator_builder, boolean_rate
@@ -95,10 +97,10 @@ survival_editors_agg = boolean_rate
 survival_editors_agg = decorator_builder(Survival.header())(
     survival_editors_agg)
 
-setattr(survival_editors_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(survival_editors_agg, um.METRIC_AGG_METHOD_NAME,
+setattr(survival_editors_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(survival_editors_agg, METRIC_AGG_METHOD_NAME,
         'survival_editors_agg')
-setattr(survival_editors_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(survival_editors_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                           'has_survived',
                                                           'rate'])
-setattr(survival_editors_agg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
+setattr(survival_editors_agg, METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})

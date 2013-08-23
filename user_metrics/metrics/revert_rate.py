@@ -7,6 +7,8 @@ __license__ = "GPL (version 2 or later)"
 from user_metrics.config import logging
 
 from collections import namedtuple
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG,\
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD, METRIC_AGG_METHOD_KWARGS
 import user_metric as um
 import os
 import user_metrics.utils.multiprocessing_wrapper as mpw
@@ -16,7 +18,6 @@ from numpy import mean
 from user_metrics.metrics import query_mod
 from user_metrics.metrics.users import UMP_MAP
 from user_metrics.utils import format_mediawiki_timestamp
-from user_metrics.metrics.user_metric import METRIC_AGG_METHOD_KWARGS
 
 
 class RevertRate(um.UserMetric):
@@ -254,9 +255,9 @@ revert_prop_agg = boolean_rate
 revert_prop_agg = decorator_builder(RevertRate.header())(
     revert_prop_agg)
 
-setattr(revert_prop_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(revert_prop_agg, um.METRIC_AGG_METHOD_NAME, 'revert_prop_agg')
-setattr(revert_prop_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(revert_prop_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(revert_prop_agg, METRIC_AGG_METHOD_NAME, 'revert_prop_agg')
+setattr(revert_prop_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                      'total_reverted',
                                                      'rate', ])
-setattr(revert_prop_agg, um.METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})
+setattr(revert_prop_agg, METRIC_AGG_METHOD_KWARGS, {'val_idx': 1})

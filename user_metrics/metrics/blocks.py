@@ -3,10 +3,10 @@ __author__ = "Ryan Faulkner and Aaron Halfaker"
 __date__ = "October 3rd, 2012"
 __license__ = "GPL (version 2 or later)"
 
-from user_metrics.config import logging
-
 from collections import namedtuple
-import user_metric as um
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_FLAG, \
+    METRIC_AGG_METHOD_NAME, METRIC_AGG_METHOD_HEAD
+from user_metrics.metrics import user_metric as um
 from user_metrics.metrics import query_mod
 from user_metrics.etl.aggregator import weighted_rate, decorator_builder,\
     boolean_rate
@@ -156,9 +156,9 @@ setattr(block_rate_agg, um.METRIC_AGG_METHOD_KWARGS, {
 block_prop_agg = boolean_rate
 block_prop_agg = decorator_builder(Blocks.header())(block_prop_agg)
 
-setattr(block_prop_agg, um.METRIC_AGG_METHOD_FLAG, True)
-setattr(block_prop_agg, um.METRIC_AGG_METHOD_NAME, 'b_prop_agg')
-setattr(block_prop_agg, um.METRIC_AGG_METHOD_HEAD, ['total_users',
+setattr(block_prop_agg, METRIC_AGG_METHOD_FLAG, True)
+setattr(block_prop_agg, METRIC_AGG_METHOD_NAME, 'b_prop_agg')
+setattr(block_prop_agg, METRIC_AGG_METHOD_HEAD, ['total_users',
                                                     'total_blocks',
                                                     'proportion'])
 setattr(block_prop_agg, um.METRIC_AGG_METHOD_KWARGS, {

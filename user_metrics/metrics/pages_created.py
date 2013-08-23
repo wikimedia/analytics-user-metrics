@@ -119,7 +119,7 @@ def _process_help(args):
 # ==========================
 
 from user_metrics.etl.aggregator import build_numpy_op_agg, build_agg_meta
-from user_metrics.metrics.user_metric import METRIC_AGG_METHOD_KWARGS
+from user_metrics.etl.aggregator import METRIC_AGG_METHOD_KWARGS
 
 metric_header = PagesCreated.header()
 
