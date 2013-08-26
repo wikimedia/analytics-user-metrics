@@ -479,6 +479,9 @@ def all_urls():
     all_data = read_pickle_data()
     key_sigs = list()
 
+    # Get a filter on the results
+    pattern = request.args.get('filter', '')
+
     for key, val in all_data.iteritems():
         if hasattr(val, '__iter__'):
             try:
@@ -492,10 +495,14 @@ def all_urls():
     for key_sig in key_sigs:
 
         url = get_url_from_keys(key_sig, 'cohorts/')
-        url_list.append("".join(['<a href="',
-                                 request.url_root, url + '">',
-                                 url,
-                                 '</a>']))
+
+        # Only filter pattern matches
+        if re.search(pattern, url):
+            url_list.append("".join(['<a href="',
+                                     request.url_root, url + '">',
+                                     url,
+                                     '</a>']))
+
     return render_template('all_urls.html', urls=url_list)
 
 
