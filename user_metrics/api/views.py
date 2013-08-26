@@ -499,26 +499,6 @@ def all_urls():
     return render_template('all_urls.html', urls=url_list)
 
 
-def thin_client_view():
-    """
-        View for handling requests outside sessions.  Useful for processing
-        jobs from https://github.com/rfaulkner/umapi_client.
-
-        Returns:
-
-            1) JSON response if the request is complete
-            2) Validation response (minimal size)
-    """
-
-    # Validate key
-    # Construct request meta
-    # Check for job cached
-    #   If YES return
-    #   If NO queue job, return verify
-
-    return None
-
-
 # Add View Decorators
 # ##
 
@@ -534,7 +514,6 @@ view_list = {
     all_metrics.__name__: all_metrics,
     about.__name__: about,
     contact.__name__: contact,
-    thin_client_view.__name__: thin_client_view,
     upload_csv_cohort.__name__: upload_csv_cohort,
     upload_csv_cohort_finish.__name__: upload_csv_cohort_finish,
     validate_cohort_name_allowed.__name__: validate_cohort_name_allowed,
@@ -562,7 +541,6 @@ route_deco = {
     all_metrics.__name__: app.route('/metrics/', methods=['POST', 'GET']),
     about.__name__: app.route('/about/'),
     contact.__name__: app.route('/contact/'),
-    thin_client_view.__name__: app.route('/thin/<string:cohort>/<string:metric>'),
     upload_csv_cohort_finish.__name__: app.route('/uploads/cohort/finish', methods=['POST']),
     upload_csv_cohort.__name__: app.route('/uploads/cohort', methods=['POST', 'GET']),
     validate_cohort_name_allowed.__name__: app.route('/validate/cohort/allowed', methods=['GET']),
@@ -575,7 +553,6 @@ views_with_anonymous_access = [
     all_metrics.__name__,
     about.__name__,
     contact.__name__,
-    thin_client_view.__name__
 ]
 
 # Apply decorators to views
