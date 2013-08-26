@@ -69,7 +69,6 @@ aggregate_data_class = namedtuple("AggregateData", "header data")
 # 2. header attribute for a type of metric aggregation methods
 # 3. name attribute for a type of metric aggregation methods
 # 4. keyword arg attribute for a type of metric aggregation methods
-# TODO - move these to the module dedicated for aggregation processing
 METRIC_AGG_METHOD_FLAG = 'metric_agg_flag'
 METRIC_AGG_METHOD_HEAD = 'metric_agg_head'
 METRIC_AGG_METHOD_NAME = 'metric_agg_name'
@@ -330,3 +329,45 @@ class AggregatorError(Exception):
     """ Basic exception class for aggregators """
     def __init__(self, message="Aggregation error."):
         Exception.__init__(self, message)
+
+
+class Aggregator(object):
+    """
+    Base class for aggregators.  Standard method for applying aggregators.
+    This class family maintains internal state of the result.
+
+    Each subclass will implement the data_etl & post_process methods.
+
+    The method header returns the object properties that store the aggregated
+    results.
+    """
+
+    def __init__(self, method=None):
+        """
+        Initialize the aggregator method
+        """
+        self._method = method
+
+    def data_etl(self, data):
+        """
+        Handle
+        """
+        return data
+
+    def post_process(self, data):
+        """
+        Define
+        """
+        self._result =  data
+
+    def run(self, data):
+        """
+        Pass data through aggregate method
+        """
+        self.post_process(
+            self._method(
+            self.data_etl(data)))
+        return self
+
+    def header(self):
+        return ['result']
