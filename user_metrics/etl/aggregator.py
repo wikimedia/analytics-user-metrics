@@ -347,18 +347,20 @@ class Aggregator(object):
         Initialize the aggregator method
         """
         self._method = method
+        self._header = ['result']
 
     def data_etl(self, data):
         """
-        Handle
+        Handles data modification prior to aggregation
         """
         return data
 
     def post_process(self, data):
         """
-        Define
+        Handles assigning aggregate values to relevant properties
+        after aggregation
         """
-        self._result =  data
+        self._result = data
 
     def run(self, data):
         """
@@ -369,5 +371,23 @@ class Aggregator(object):
             self.data_etl(data)))
         return self
 
+    @property
     def header(self):
-        return ['result']
+        return self._header
+
+
+class AggregatorStatOp(Aggregator):
+    """
+    This type handles basic statistical operations like mean, median, sum, etc.
+    """
+
+    def __init__(self, methods, field_prefixes, header):
+        super(AggregatorStatOp, self).__init__(methods)
+        self._header = header
+        self._field_prefixes = field_prefixes
+
+    def data_etl(self, data):
+        super(AggregatorStatOp, self).data_etl(data)
+
+    def post_process(self, data):
+        super(AggregatorStatOp, self).post_process(data)
