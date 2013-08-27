@@ -404,3 +404,11 @@ class AggregatorStatOp(Aggregator):
 
     def post_process(self, data):
         super(AggregatorStatOp, self).post_process(data)
+
+    def run(self, data):
+        """
+        Pass data through aggregate method
+        """
+        for item in self._agg_items:
+            setattr(self, item[0], item[2]([elem[item[1]] for elem in data]))
+        return self
