@@ -386,6 +386,14 @@ class AggregatorStatOp(Aggregator):
         self._header = header
         self._field_prefixes = field_prefixes
 
+    def _build_agg_items(self):
+        """
+        For each aggregate field store the name, index in data, and op
+        """
+        self._agg_items = [(name + op.__name__, index, op)
+            for name, index in self._field_prefixes.iteritems()
+            for op in self._method]
+
     def data_etl(self, data):
         super(AggregatorStatOp, self).data_etl(data)
 
