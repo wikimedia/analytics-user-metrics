@@ -342,6 +342,8 @@ class Aggregator(object):
     results.
     """
 
+    aggregator_meta = namedtuple('aggregator_meta', 'field index method')
+
     def __init__(self, method=None):
         """
         Initialize the aggregator method
@@ -391,13 +393,13 @@ class AggregatorStatOp(Aggregator):
         """
         For each aggregate field store the name, index in data, and op
         """
-        self._agg_items = [(name + op.__name__, index, op)
-            for name, index in self._field_prefixes.iteritems()
+        self._agg_items = [Aggregator.aggregator_meta(name + op.__name__,
+            index, op) for name, index in self._field_prefixes.iteritems()
             for op in self._method]
 
     @property
     def header(self):
-        return [item[0] for item in self._agg_items]
+        return [item.field for item in self._agg_items]
 
     def data_etl(self, data):
         super(AggregatorStatOp, self).data_etl(data)
@@ -407,8 +409,8 @@ class AggregatorStatOp(Aggregator):
 
     def run(self, data):
         """
-        Pass data through aggregate method
+        Call each aggregation method
         """
         for item in self._agg_items:
-            setattr(self, item[0], item[2]([elem[item[1]] for elem in data]))
+            setattr(self, item.field, item.method([elem[item.index] for elem in data]))
         return self
