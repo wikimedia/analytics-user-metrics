@@ -7,12 +7,14 @@
 
 from user_metrics.utils import nested_import
 from user_metrics.config import settings
-from multiprocessing import Lock
 from user_metrics.api.broker import FileBroker
 
-REQUEST_BROKER_TARGET = 'request_broker.txt'
-RESPONSE_BROKER_TARGET = 'response_broker.txt'
-PROCESS_BROKER_TARGET = 'process_broker.txt'
+from user_metrics.config import settings as conf
+
+BROKER_HOME = conf.__project_home__ + 'data/'
+REQUEST_BROKER_TARGET = BROKER_HOME + 'request_broker.txt'
+RESPONSE_BROKER_TARGET = BROKER_HOME + 'response_broker.txt'
+PROCESS_BROKER_TARGET = BROKER_HOME + 'process_broker.txt'
 
 umapi_broker_context = FileBroker()
 
