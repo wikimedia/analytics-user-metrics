@@ -10,15 +10,12 @@ __license__ = "GPL (version 2 or later)"
 
 from user_metrics.api import RESPONSE_BROKER_TARGET, umapi_broker_context
 from user_metrics.config import logging
-from user_metrics.api.engine import unpack_response_for_broker
+from user_metrics.api.engine import unpack_response_for_broker, \
+    RESPONSE_TIMEOUT
 from user_metrics.api.engine.request_meta import build_request_obj
 from user_metrics.api.engine.data import set_data
 
 import time
-
-# Timeout in seconds to wait for data on the queue.  This should be long
-# enough to ensure that the full response can be received
-RESPONSE_TIMEOUT = 3.0
 
 
 # API RESPONSE HANDLER
@@ -36,7 +33,7 @@ def process_response():
         time.sleep(RESPONSE_TIMEOUT)
 
         # Handle any responses as they enter the queue
-        logging.debug(log_name  + ' - POLLING RESPONSES...')
+        # logging.debug(log_name  + ' - POLLING RESPONSES...')
         res_item = umapi_broker_context.pop(RESPONSE_BROKER_TARGET)
         if not res_item:
             continue

@@ -85,7 +85,8 @@ from user_metrics.config import logging, settings
 from user_metrics.api import MetricsAPIError, error_codes, query_mod, \
     REQUEST_BROKER_TARGET, umapi_broker_context,\
     RESPONSE_BROKER_TARGET, PROCESS_BROKER_TARGET
-from user_metrics.api.engine import pack_response_for_broker
+from user_metrics.api.engine import pack_response_for_broker, \
+    RESQUEST_TIMEOUT, MAX_BLOCK_SIZE, MAX_CONCURRENT_JOBS
 from user_metrics.api.engine.data import get_users
 from user_metrics.api.engine.request_meta import build_request_obj
 from user_metrics.metrics.users import MediaWikiUser
@@ -101,16 +102,6 @@ from hashlib import sha1
 
 # API JOB HANDLER
 # ###############
-
-# MODULE CONSTANTS
-#
-# 1. Determines maximum block size of queue item
-# 2. Number of maximum concurrently running jobs
-# 3. Time to block on waiting for a new request to appear in the queue
-MAX_BLOCK_SIZE = 5000
-MAX_CONCURRENT_JOBS = 1
-QUEUE_WAIT = 5
-RESQUEST_TIMEOUT = 3.0
 
 # Defines the job item type used to temporarily store job progress
 job_item_type = namedtuple('JobItem', 'id process request queue')
@@ -148,7 +139,7 @@ def job_control():
         # Request Queue Processing
         # ------------------------
 
-        logging.debug(log_name + ' :: POLLING REQUESTS...')
+        # logging.debug(log_name + ' :: POLLING REQUESTS...')
         logging.debug(log_name + ' :: JOB QUEUE - {0}'.format(str(job_queue)))
         req_item = None
 

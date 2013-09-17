@@ -59,6 +59,20 @@ DEFAULT_QUERY_VAL = 'present'
 # DELIMETER FOR RESPONSE IN BROKER
 RESPONSE_DELIMETER = '<&>'
 
+# Timeout in seconds to wait for data on the queue.  This should be long
+# enough to ensure that the full response can be received
+RESPONSE_TIMEOUT = 10.0
+RESQUEST_TIMEOUT = 10.0
+
+# MODULE CONSTANTS
+#
+# 1. Determines maximum block size of (multiprocessing.)queue item
+# 2. Number of maximum concurrently running jobs
+# 3. Time to block on waiting for a new request to appear in the queue
+MAX_BLOCK_SIZE = 5000
+MAX_CONCURRENT_JOBS = 2
+
+
 #
 # Cohort parsing methods
 #
