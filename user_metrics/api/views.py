@@ -395,11 +395,12 @@ def output(cohort, metric):
 
     # Generate url hash - replace 'refresh' in url
     query_args = ''
-    if re.search('/?',request.url):
+
+    if re.search('\?',request.url):
         query_args = '?' + request.url.split('?')[-1]
 
-    url = re.sub(REFRESH_REGEX, '', request.script_root + request.path + query_args)
-    url = re.sub('/cohorts/', '', url)
+    url = re.sub(REFRESH_REGEX, '', request.path + query_args)
+    url = re.sub(r'/cohorts/', '', url)
     url_hash = sha1(url.encode('utf-8')).hexdigest()
 
     # Determine whether result is already cached
