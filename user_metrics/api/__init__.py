@@ -11,7 +11,7 @@ from user_metrics.api.broker import FileBroker
 
 from user_metrics.config import settings as conf
 
-BROKER_HOME = conf.__project_home__ + 'data/'
+BROKER_HOME = conf.__data_file_dir__
 REQUEST_BROKER_TARGET = BROKER_HOME + 'request_broker.txt'
 RESPONSE_BROKER_TARGET = BROKER_HOME + 'response_broker.txt'
 PROCESS_BROKER_TARGET = BROKER_HOME + 'process_broker.txt'
@@ -19,9 +19,6 @@ PROCESS_BROKER_TARGET = BROKER_HOME + 'process_broker.txt'
 umapi_broker_context = FileBroker()
 
 query_mod = nested_import(settings.__query_module__)
-
-# The url path that precedes an API request
-REQUEST_PATH = 'cohorts/'
 
 
 # Error codes for web requests
