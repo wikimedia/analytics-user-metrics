@@ -31,16 +31,6 @@ then run puppet again:
 Now you should be able to browse to [user metrics running locally][local_vagrant_user_metrics_server] and start working.  The code that's being served is under the user\_metrics folder and you can use that like any clone of a gerrit repository.
 
 
-Setup a Virtual Environment
----------------------------
-
-Note: instructions to install a virtualenv here - http://www.virtualenv.org/en/latest/.
-
-Create virtualenv with `virtualenv <your virtualenv>`
-
-Activate with `source <yourenv>/bin/activate`
- 
-
 Installing Umapi
 ----------------
 
@@ -49,14 +39,35 @@ Run `git clone ssh://rfaulk@gerrit.wikimedia.org:29418/analytics/user-metrics`
 Navigate to `user-metrics` and run `pip install -e .`
 
 
+Setup a Virtual Environment
+---------------------------
+
+Note: instructions to install a virtualenv here - http://www.virtualenv.org/en/latest/.
+
+Create virtualenv with `virtualenv <your virtualenv>`
+
+Activate with `source <yourenv>/bin/activate`
+
+Once in the virtualenv run navigate to your user-metrics project folder (contains setup.py) and do a local install of
+user-metrics with:
+
+    $ pip install -e .
+
+This should take care of all of the dependencies for the project.
+
+To leave the virtualenv simply call:
+
+    $ deactivate
+
+
 Configure the clone
 -------------------
 
 In user_metrics/config run `cp settings.py.example settings.py` and configure as instructed below to point to datasources. Ensure that
-datasource hosts are reachable from your environment.  To run the server execute:
+datasource hosts are reachable from your environment.  In the virtualenv, create a 'logs' folder and run the server with:
 
-	$ python user_metrics/api/run.py
-	$ python user_metrics/api/run_handlers.py
+	$ nohup python -u user_metrics/api/run.py > logs/access.log &
+	$ nohup python -u user_metrics/api/run_handlers.py > logs/access.log &
 
 The module run.py initiates the flask web server and is also the wsgi target if the instance is being run via Apache.
 Also it is necessary to execute run_handlers.py which initiates the job handling processes.  If you are running the
