@@ -28,7 +28,8 @@ setup(
         'numpy == 1.6.2',
         'Flask == 0.9',
         'python-dateutil >= 2.1',
-        # MySQLdb is not in PyPi
+        'Flask >= 0.2.7',
+        'MySQL-python >= 1.2.3',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
