@@ -182,8 +182,6 @@ class FileBroker(Broker):
         except IOError:
             with open(target, 'w'):
                 pass
-
-            return None
         return all_keys
 
     def pop(self, target):
